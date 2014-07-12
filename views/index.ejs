@@ -6,10 +6,11 @@
 	<body>
 		<h3>Endadhe - Sneaky Necromancer Redux</h3>
 		<div id="gameView" />
-		<canvas id="canvas" width="800" height="800" />
+		<canvas id="canvas" width="800" height="800" tabindex="1"/>
 		<script type="text/javascript" src="/js/lib/rhill-voronoi-core.js"></script>
 		<script type="text/javascript" src="/js/lib/lodash.js"></script>
 		<script type="text/javascript" src="/js/client.js"></script>
+		<script type="text/javascript" src="/js/lib/jquery-1.11.0.min.js"></script>
 		<script type="text/javascript">
 			var hexes = [];
 			var minX = 0;
@@ -26,8 +27,8 @@
 			var you = new Necromancer({coord:{x:1,y:1}});
 			var canvas = document.getElementById("canvas")
 			var ctx = canvas.getContext("2d");
-			var renderer = setInterval("render()",10);
-			var simulator = setInterval("simulate()",10);
+			var renderer = setInterval("render()",100);
+			var simulator = setInterval("simulate()",500);
 			function render(){
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				var zoom = 0.25;
@@ -37,36 +38,40 @@
 				}
 				you.render(canvas,you.hexCoord, zoom,{x:50, y:50});
 			}
+			//Simulate
+			function simulate(){
 
-			// valid moves
+			}
+			//Input
 			var	neighbors = [
-				   {x:-1,  y:0},{x:0,y:-1},{x:1, y:-1},
+				   {x:-1,  y:0},{x:0,y:-1},{x:1, y:-1},{x:0, y:0},
 				   {x:-1,  y:1},{x:0, y:1},{x:1, y:0}
 				]
-			function simulate(){
-				
-				var failedToMove = true;
-				//Move Necromancer
-				while(failedToMove)
-				{
-					var rand = Math.floor(Math.random() * neighbors.length);
-					var target = { 
-						x:you.hexCoord.x + neighbors[rand].x,
-						y:you.hexCoord.y + neighbors[rand].y
-					};
-					if(!_.find(hexes,function(hex){return _.isEqual(hex.hexCoord, target)}))
-						failedToMove = true;
-					else
-					{
-						failedToMove = false;
-						you.hexCoord = target;
-					}
+			document.getElementById("canvas").focus();
+			$( "#canvas" ).keydown(function(e) {
+				var dir = e.which;
+				var mapping = {
+					68 : 6,
+					65 : 4,
+					83 : 5,
+					87 : 1,
+					81 : 0,
+					69 : 2
 				}
-				//Print out stuff about hex necromancer is in
+				dir = mapping[dir] || mapping[dir]===0?mapping[dir]:3;
+				var target = { 
+					x:you.hexCoord.x + neighbors[dir].x,
+					y:you.hexCoord.y + neighbors[dir].y
+				};
+				//Make sure hex exists at coord
+				if(_.find(hexes,function(hex){return _.isEqual(hex.hexCoord, target)})) you.hexCoord = target;	
+				//Simulate necromancer influence on hex
 				var hex = _.find(hexes,function(hex){return _.isEqual(hex.hexCoord,you.hexCoord)})
-				hex.fear += 10;
-				_.each(hexes,function(oHex){if(!_.isEqual(hex,oHex)) oHex.fear *= 0.99})
-			}
+				hex.fear += .15;
+				if(hex.type == 'Village')you.stealth = Math.max(0, you.stealth-0.40);
+				else you.stealth =Math.min(1,you.stealth+0.10);
+				_.each(hexes,function(oHex){if(!_.isEqual(hex,oHex)) oHex.fear *= 0.99})  
+			});
 		</script>
 	</body>
 </html>
