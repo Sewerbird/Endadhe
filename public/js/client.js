@@ -21,11 +21,28 @@ var GameHex = function(state){
 			corpse_husk: 0
 		}
 	}
+	self.populationSize = Math.ceil(Math.random()* 200);
+	self.fear = Math.floor(Math.random()*100)
 	self.siteName = LangUtils.createRandomPolishSoundingPlaceName();
 	self.type = 'Village'
 	self.terrainType = 'Moor'
 	self.hexCoord = state.coord;
-	self.color = "green";
+	self.color = function(){
+		//Fear map
+		var b = "00";
+		var r = Math.floor(self.fear);
+		var g = 100 - r;
+
+		if(r < 0) r = "00";
+		else if(r < 10) r = "0"+r;
+		else if(r >= 100) r = "A0";
+		
+		if(g < 0) g = "00";
+		else if(g < 10) g = "0"+g;
+		else if(g >= 100) g = "A0";
+
+		return "#"+r+g+b;
+	}
 }
 //Draw self at specified coord on canvas at a certain zoom scale
 GameHex.prototype.render = function(canvas, coord, scale, offset)
@@ -37,9 +54,9 @@ GameHex.prototype.render = function(canvas, coord, scale, offset)
 	var yOff = loc.y;
 	var ctx = canvas.getContext("2d");
 	//Draw Hex
-	var grd=ctx.createLinearGradient(xOff, yOff-2*coordScale, xOff, yOff+2*coordScale);
+	var grd=ctx.createLinearGradient(xOff+coordScale/2, yOff-2*coordScale, xOff-coordScale/2, yOff+2*coordScale);
 	grd.addColorStop(0, "white");
-	grd.addColorStop(1, this.color);
+	grd.addColorStop(1, this.color());
 	ctx.fillStyle=grd;
 	ctx.beginPath();
 	for(var i = 0; i < 6; i++)
@@ -68,6 +85,12 @@ GameHex.prototype.render = function(canvas, coord, scale, offset)
 	fontSize = Math.ceil(20 * scale);
 	ctx.font = ""+fontSize+"px Arial";
 	ctx.fillText("("+self.type+")", xOff, yOff+(20*scale)); //(Site type)
+	fontSize = Math.ceil(25 * scale);
+	ctx.font = "italic "+fontSize+"px Arial";
+	ctx.fillText("Pop: "+self.populationSize, xOff, yOff + (50*scale));//Population
+	fontSize = Math.ceil(25 * scale);
+	ctx.font = "italic "+fontSize+"px Arial";
+	ctx.fillText("Fear: "+Math.floor(self.fear)+"%", xOff, yOff + (-45*scale));//Fear
 }
 
 var Necromancer = function(state){
@@ -89,7 +112,7 @@ Necromancer.prototype.render = function(canvas, coord, scale, offset){
 	ctx.lineTo(xOff-30*scale, yOff+50*scale);
 	ctx.lineTo(xOff+30*scale, yOff+50*scale);
 	ctx.closePath();
-	ctx.lineWidth = 2;
+	ctx.lineWidth = 2*scale;
 	ctx.strokeStyle='cyan';
 	ctx.fillStyle = 'black';
 	ctx.fill();
@@ -115,13 +138,21 @@ var LangUtils = {
 	}
 }
 var HexMath = {
+	screenCoordToHexCoord : function(point, scale, offset){
+		var pX = point.x;
+		var pY = point.y;
+		var horiz = 1.5 * scale;
+		var height = Math.sqrt(3) * scale;
+		var x = (pX-offset.x)/horiz;
+		var y = (pY-offset.y - x/(height/2))/height
+		return {x : Math.round(x), y: Math.round(y)}
+	},
 	hexCoordToScreenCoord : function(coord, scale, offset){
 		//scale is the scaled radius
 		var offset_X = offset.x;
 		var offset_Y = offset.y;
 		var horiz = 1.5 * scale;
 		var height = Math.sqrt(3) * scale;
-		var even = coord.x%2==0;
 		return {x: coord.x * horiz + offset_X, y: coord.y * height + coord.x * height/2 + offset_Y}
 	}
 }

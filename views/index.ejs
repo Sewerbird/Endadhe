@@ -12,13 +12,13 @@
 		<script type="text/javascript" src="/js/client.js"></script>
 		<script type="text/javascript">
 			var hexes = [];
-			var minX = 1;
+			var minX = 0;
 			var minY = 0;
-			var maxX = 3;
-			var maxY = 2;
-			for(var i = minY; i < maxY; i ++)
+			var maxX = 10;
+			var maxY = 5;
+			for(var j = minX; j < maxX; j ++)
 			{
-				for(var j = minX; j < maxX; j++)
+				for(var i = minY - Math.floor(j/2); i < maxY- Math.floor(j/2); i++)
 				{
 					hexes.push(new GameHex({coord:{x:j , y: i}}))
 				}
@@ -27,15 +27,15 @@
 			var canvas = document.getElementById("canvas")
 			var ctx = canvas.getContext("2d");
 			var renderer = setInterval("render()",10);
-			var simulator = setInterval("simulate()",1000);
+			var simulator = setInterval("simulate()",10);
 			function render(){
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				var zoom = 0.5;
+				var zoom = 0.25;
 				for(var hex in hexes)
 				{
-					hexes[hex].render(canvas, hexes[hex].hexCoord, zoom ,{x:0, y:0});
+					hexes[hex].render(canvas, hexes[hex].hexCoord, zoom ,{x:50, y:50});
 				}
-				you.render(canvas,you.hexCoord, zoom,{x:0, y:0});
+				you.render(canvas,you.hexCoord, zoom,{x:50, y:50});
 			}
 
 			// valid moves
@@ -44,6 +44,7 @@
 				   {x:-1,  y:1},{x:0, y:1},{x:1, y:0}
 				]
 			function simulate(){
+				
 				var failedToMove = true;
 				//Move Necromancer
 				while(failedToMove)
@@ -53,7 +54,7 @@
 						x:you.hexCoord.x + neighbors[rand].x,
 						y:you.hexCoord.y + neighbors[rand].y
 					};
-					if(target.x >= maxX || target.x < minX || target.y >= maxY || target.y < minY)
+					if(!_.find(hexes,function(hex){return _.isEqual(hex.hexCoord, target)}))
 						failedToMove = true;
 					else
 					{
@@ -63,7 +64,8 @@
 				}
 				//Print out stuff about hex necromancer is in
 				var hex = _.find(hexes,function(hex){return _.isEqual(hex.hexCoord,you.hexCoord)})
-				console.log(hex.siteName);
+				hex.fear += 10;
+				_.each(hexes,function(oHex){if(!_.isEqual(hex,oHex)) oHex.fear *= 0.99})
 			}
 		</script>
 	</body>
