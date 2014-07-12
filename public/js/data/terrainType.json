@@ -1,0 +1,27 @@
+[
+	{"type":"Village",
+		"color":"function(hex_this){
+			return function(
+			//Fear map
+			var b = 0;
+			var r = Math.min(Math.max(0,Math.floor(200 * hex_this.fear)),255);
+			var g = Math.min(Math.max(0,200 - r),255);
+
+			return 'rgb('+r+','+g+','+b+')';);
+		}",
+		"named": true,
+		"stealthRegainRate": 0.0,
+	},
+	{"type":"Moor",
+		"color":"#605030",
+		"stealthRegainRate": 0.1
+	},
+	{"type":"Forest",
+		"color":"#105020",
+		"stealthRegainRate": 0.3
+	},
+	{"type":"Mountain",
+		"color":"#405080",
+		"stealthRegainRate": 0.2
+	}
+]

@@ -1,3 +1,10 @@
+//   ██████╗  █████╗ ███╗   ███╗███████╗    ██╗  ██╗███████╗██╗  ██╗
+//  ██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██║  ██║██╔════╝╚██╗██╔╝
+//  ██║  ███╗███████║██╔████╔██║█████╗      ███████║█████╗   ╚███╔╝ 
+//  ██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ██╔══██║██╔══╝   ██╔██╗ 
+//  ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗    ██║  ██║███████╗██╔╝ ██╗
+//   ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+//   
 var GameHex = function(state){
 	var self = this;
 	self.population = {
@@ -21,42 +28,64 @@ var GameHex = function(state){
 			corpse_husk: 0
 		}
 	}
-	if(Math.random() > 0.5)//is Town
-	{
-		self.populationSize = Math.ceil(Math.random()* 200);
-		self.fear = Math.random()
-		self.siteName = LangUtils.createRandomPolishSoundingPlaceName();
-		self.type = 'Village'
-		self.terrainType = 'Moor'
-		self.hexCoord = state.coord;
-		self.color = function(){
-			//Fear map
-			var b = 0;
-			var r = Math.min(Math.max(0,Math.floor(200 * self.fear)),255);
-			var g = Math.min(Math.max(0,200 - r),255);
+	var terrainTypes = [
+		{type:'Village',
+			color:function(){
+				//Fear map
+				var b = 0;
+				var r = Math.min(Math.max(0,Math.floor(200 * self.fear)),255);
+				var g = Math.min(Math.max(0,200 - r),255);
 
-			return "rgb("+r+","+g+","+b+")";
+				return "rgb("+r+","+g+","+b+")";
+			},
+			name:LangUtils.createRandomPolishSoundingPlaceName,
+			stealthRegainRate: -0.30,
+			populationSize: Math.floor(Math.random()*200)
+		},
+		{type:'Moor',
+			color:function(){return "#605030"},
+			name:function(){return ""},
+			stealthRegainRate: -0.1,
+			populationSize: Math.floor(Math.random()*200)
+		},
+		{type:'Forest',
+			color:function(){return "#105020"},
+			name:function(){return ""},
+			stealthRegainRate: 0.3,
+			populationSize: Math.floor(Math.random()*200)
+		},
+		{type:'Mountain',
+			color:function(){return "#405080"},
+			name:function(){return ""},
+			stealthRegainRate: 0.1,
+			populationSize: Math.floor(Math.random()*200)
 		}
-	}	
-	else//Wilderness
-	{
-		self.type = 'Terrain'
-		self.terrainType = 'Moor'
-		self.hexCoord = state.coord;
-		self.color = function(){return "#505050"};
-		self.fear = 0;
-		self.populationSize = 0;
-	}
+	]
+	var assignType = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
+	if(assignType.named) self.siteName = LangUtils.createRandomPolishSoundingPlaceName();
+	self.color = assignType.color;
+	self.fear = Math.random();
+	self.siteName = assignType.name();
+	self.type = assignType.type;
+	self.hexCoord = state.coord;
+	self.terrainType = assignType.onTerrain?assignType.onTerrain:assignType.type
+	self.populationSize = assignType.populationSize;
+	self.stealthRegainRate = assignType.stealthRegainRate;
+}
+GameHex.prototype.simulate = function(hexes){
+	var self = this;
+
+	self.fear *= 0.9;
 }
 //Draw self at specified coord on canvas at a certain zoom scale
-GameHex.prototype.render = function(canvas, coord, scale, offset)
+GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 {
+	if(!scaleSprite) scaleSprite = 1;
 	var self = this;
 	var coordScale = 200 * scale; //Actual pixel width between each hex coord
 	var loc = HexMath.hexCoordToScreenCoord(coord, coordScale, offset);
 	var xOff = loc.x;
 	var yOff = loc.y;
-	var ctx = canvas.getContext("2d");
 	//Draw Hex
 	var grd=ctx.createLinearGradient(xOff+coordScale/2, yOff-2*coordScale, xOff-coordScale/2, yOff+2*coordScale);
 	grd.addColorStop(0, "white");
@@ -66,8 +95,8 @@ GameHex.prototype.render = function(canvas, coord, scale, offset)
 	for(var i = 0; i < 6; i++)
 	{
 		var angle = 2 * Math.PI / 6 * i;
-		x_i = coordScale * Math.cos(angle) + xOff;
-		y_i = coordScale * Math.sin(angle) + yOff;
+		x_i = coordScale * scaleSprite * Math.cos(angle) + xOff;
+		y_i = coordScale * scaleSprite * Math.sin(angle) + yOff;
 		if(i == 0)
 			ctx.moveTo(x_i, y_i);
 		else
@@ -76,30 +105,40 @@ GameHex.prototype.render = function(canvas, coord, scale, offset)
 		}
 	}
 	ctx.closePath();
-	ctx.lineWidth = 5 * scale;
+	ctx.lineWidth = 5 * scale * scaleSprite;
 	ctx.strokeStyle = 'gray';
 	ctx.fill();
 	ctx.stroke();
 	//Draw text on hex
 	ctx.fillStyle='black'
 	ctx.textAlign = "center";
-	fontSize = Math.ceil(20 * scale);
+	fontSize = Math.ceil(20 * scale * scaleSprite);
 	ctx.font = ""+fontSize+"px Arial";
-	ctx.fillText("("+self.terrainType+")", xOff, yOff+(20*scale)); //(Site type)
+	ctx.fillText("("+self.terrainType+")", xOff, yOff+(20*scale * scaleSprite)); //(Site type)
 	if(self.type == 'Village')
 	{
-		fontSize = Math.ceil(30 * scale);
+		fontSize = Math.ceil(30 * scale * scaleSprite);
 		ctx.font = "bold "+fontSize+"px Arial";
 		ctx.fillText(self.siteName,xOff,yOff); //Site name
-		fontSize = Math.ceil(25 * scale);
+		fontSize = Math.ceil(25 * scale * scaleSprite);
 		ctx.font = "italic "+fontSize+"px Arial";
-		ctx.fillText("Pop: "+self.populationSize, xOff, yOff + (50*scale));//Population
-		fontSize = Math.ceil(25 * scale);
+		ctx.fillText("Pop: "+self.populationSize, xOff, yOff + (50*scale * scaleSprite));//Population
+		fontSize = Math.ceil(25 * scale * scaleSprite);
 		ctx.font = "italic "+fontSize+"px Arial";
-		ctx.fillText("Fear: "+Math.floor(self.fear * 100)+"%", xOff, yOff + (-45*scale));//Fear
+		ctx.fillText("Fear: "+Math.floor(self.fear * 100)+"%", xOff, yOff + (-45*scale * scaleSprite));//Fear
 	}
+	fontSize = Math.ceil(50 * scale * scaleSprite);
+	ctx.font = "bold italic "+fontSize+"px Arial";
+	ctx.fillStyle = 'rgba(255,255,255,0.3)'
+	ctx.fillText(JSON.stringify(_.values(self.hexCoord)),xOff, yOff + (150 * scale * scaleSprite));
 }
-
+//  ███╗   ██╗███████╗ ██████╗██████╗  ██████╗ ███╗   ███╗ █████╗ ███╗   ██╗ ██████╗███████╗██████╗ 
+//  ████╗  ██║██╔════╝██╔════╝██╔══██╗██╔═══██╗████╗ ████║██╔══██╗████╗  ██║██╔════╝██╔════╝██╔══██╗
+//  ██╔██╗ ██║█████╗  ██║     ██████╔╝██║   ██║██╔████╔██║███████║██╔██╗ ██║██║     █████╗  ██████╔╝
+//  ██║╚██╗██║██╔══╝  ██║     ██╔══██╗██║   ██║██║╚██╔╝██║██╔══██║██║╚██╗██║██║     ██╔══╝  ██╔══██╗
+//  ██║ ╚████║███████╗╚██████╗██║  ██║╚██████╔╝██║ ╚═╝ ██║██║  ██║██║ ╚████║╚██████╗███████╗██║  ██║
+//  ╚═╝  ╚═══╝╚══════╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚═╝  ╚═╝
+// 
 var Necromancer = function(state){
 	var self = this;
 	self.stealth = 0.50;
@@ -109,7 +148,23 @@ var Necromancer = function(state){
 		return "rgb("+0+","+k+","+k+")";
 	}
 }
-Necromancer.prototype.render = function(canvas, coord, scale, offset){
+Necromancer.prototype.simulate = function(hexes){
+	var self = this;
+	if( self.willMoveTo && //has place to move to
+		_.find(hexes,function(hex){return _.isEqual(hex.hexCoord, self.willMoveTo)})) //place exists
+		self.hexCoord = self.willMoveTo;
+	var hex = _.find(hexes,function(hex){return _.isEqual(hex.hexCoord,self.hexCoord)})
+	if(hex.type == 'Village')
+	{	//Assume terrorizing
+		self.stealth = Math.max(0, self.stealth-0.40);
+		hex.fear += .15;
+	}
+	else
+	{	//Assume hiding
+		self.stealth =Math.min(1,self.stealth+0.40*hex.stealthRegainRate);
+	}
+}
+Necromancer.prototype.render = function(ctx, coord, scale, offset){
 	var self = this;
 
 	var coordScale = 200 * scale; //Actual pixel width between each hex coord
@@ -117,7 +172,6 @@ Necromancer.prototype.render = function(canvas, coord, scale, offset){
 	var xOff = loc.x;
 	var yOff = loc.y + 50 * scale;
 
-	var ctx = canvas.getContext("2d");
 	ctx.beginPath();
 	ctx.moveTo(xOff,yOff);
 	ctx.lineTo(xOff-30*scale, yOff+50*scale);
@@ -129,7 +183,72 @@ Necromancer.prototype.render = function(canvas, coord, scale, offset){
 	ctx.fill();
 	ctx.stroke();
 }
-
+//   ██████╗  █████╗ ███╗   ███╗███████╗
+//  ██╔════╝ ██╔══██╗████╗ ████║██╔════╝
+//  ██║  ███╗███████║██╔████╔██║█████╗  
+//  ██║   ██║██╔══██║██║╚██╔╝██║██╔══╝  
+//  ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗
+//   ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+//    
+var Game = function(canvas, mapParams){
+	var self = this;
+	self.player = new Necromancer({coord:{x:1,y:1}});
+	self.hexes = [];
+	self.mapParams = _.defaults(mapParams?mapParams:{},{
+		min : {x: 0, y:0},
+		max : {x: 7, y:4},
+		rad : 200
+	});
+	for(var j = self.mapParams.min.x; j < self.mapParams.max.x; j ++)
+	{
+		for(var i = self.mapParams.min.y - Math.floor(j/2); i < self.mapParams.max.y- Math.round(j/2); i++)
+		{
+			self.hexes.push(new GameHex({coord:{x:j , y: i}}))
+			console.log('x');
+		}
+	}
+	self.canvas = canvas;
+	self.render()
+}
+Game.prototype.simulate = function(){
+	var self = this;
+	//Simulate game elements
+	_.each(self.hexes,function(hex){hex.simulate(self.hexes)});
+	self.player.simulate(self.hexes);
+}
+Game.prototype.render = function(){	
+	var self = this;
+	//Setup view context
+	var ctx = self.canvas.getContext("2d");
+	var zoom = 0.4;
+	var offset = {x:40, y:40};
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	//Render game elements
+	_.each(self.hexes,function(hex){hex.render(ctx, hex.hexCoord, zoom, offset)})
+	self.player.render(ctx, self.player.hexCoord, zoom, offset);
+}
+Game.prototype.acceptUserInput = function(action){
+	var self = this;
+	//Input: Valid ways for player to move on the hex map relative to a coord
+	var	neighbors = [
+		   {x:-1,  y:0},{x:0,y:-1},{x:1, y:-1},
+		   				{x:0, y:0},
+		   {x:-1,  y:1},{x:0, y:1},{x:1, y:0}
+		]
+	var dir = action.playerAvatarDirection;
+	var target = {x:game.player.hexCoord.x + neighbors[dir].x, y:game.player.hexCoord.y + neighbors[dir].y};
+	if(_.find(game.hexes,function(hex){return _.isEqual(hex.hexCoord, target)})) game.player.willMoveTo = target;
+	//TODO: New turn on every user input for now: eventually will be based on 'Next Turn' button
+	self.simulate();	
+	self.render();
+}
+//  ██╗   ██╗████████╗██╗██╗     ███████╗
+//  ██║   ██║╚══██╔══╝██║██║     ██╔════╝
+//  ██║   ██║   ██║   ██║██║     ███████╗
+//  ██║   ██║   ██║   ██║██║     ╚════██║
+//  ╚██████╔╝   ██║   ██║███████╗███████║
+//   ╚═════╝    ╚═╝   ╚═╝╚══════╝╚══════╝
+// 
 var LangUtils = {
 	createRandomPolishSoundingPlaceName : function(){
 		var adjectives = ["Nowy","Stara","Dolny","Górny","Wielke"];
@@ -150,116 +269,26 @@ var LangUtils = {
 }
 var HexMath = {
 	screenCoordToHexCoord : function(point, scale, offset){
-		var pX = point.x;
-		var pY = point.y;
-		var horiz = 1.5 * scale;
-		var height = Math.sqrt(3) * scale;
-		var x = (pX-offset.x)/horiz;
-		var y = (pY-offset.y - x/(height/2))/height
-		return {x : Math.round(x), y: Math.round(y)}
+		var self = this;
+		//TODO: this is not wholly correct, but rough. Each hex has a square selecting area
+		var pX = point.x - offset.x;
+		var pY = point.y - offset.y;
+		var coordScale = 200 * scale;
+		var horiz = 1.5 * coordScale;
+		var height = Math.sqrt(3) * coordScale;
+		//Get a rough guess
+		var near_x = (pX)/horiz;
+		var near_y = (pY)/height - Math.round(near_x)/2;
+		var near = {x:near_x, y:near_y};
+		var round = {x:Math.round(near_x), y:Math.round(near_y)}
+		if(round.x==-0)round.x=0;
+		if(round.y==-0)round.y=0;
+		return round;
 	},
 	hexCoordToScreenCoord : function(coord, scale, offset){
 		//scale is the scaled radius
-		var offset_X = offset.x;
-		var offset_Y = offset.y;
 		var horiz = 1.5 * scale;
 		var height = Math.sqrt(3) * scale;
-		return {x: coord.x * horiz + offset_X, y: coord.y * height + coord.x * height/2 + offset_Y}
+		return {x: coord.x * horiz + offset.x, y: coord.y * height + coord.x * height/2 + offset.y}
 	}
-}
-var TerrainHex = function(state){
-	var self = this;
-
-	self.population = {
-		good : {
-			villager_content : 500,
-			villager_scared : 0,
-			villager_militia : 0,
-			villager_hero : 0
-		},
-		evil : {
-			necro_slave : 0,
-			necro_cultist : 0,
-			necro_minion : 0,
-			necro_zombie : 0,
-			necro_skeleton: 0,
-			necro_wight : 0
-		},
-		resources : {
-			corpse_recent: 1,
-			corpse_old : 3,
-			corpse_ancient: 40,
-			corpse_husk : 0,
-		}
-	}
-	self.sites = {
-		village : true,
-		graveyard : false,
-		battlefield : false,
-		cave : true,
-		forest : true,
-
-	}
-}
-
-var drawTiles = function(size, hexX, hexY){
-	console.log("x");
-	//Canvas
-	var c = document.getElementById("canvas");
-	var ctx = c.getContext("2d");
-	ctx.fillStyle = "#0099FF"
-	//Voronoi
-	var offset_X = 30;
-	var offset_Y = 30;
-	var viewX = hexX * 1.5 * size + offset_X - size/2;
-	var viewY = hexY * Math.sqrt(3) * size + offset_Y;
-	var sites = generateHexCenterGrid(size, hexX, hexY, offset_X, offset_Y);
-	var bbox = {xl:0, xr:viewX, yt:0, yb:viewY};
-	var voronoi = new Voronoi();
-	var tiles = voronoi.compute(sites,bbox);
-	//Draw
-	for(var e in tiles.edges){
-		var edge = tiles.edges[e];
-		ctx.moveTo(edge.va.x, edge.va.y);
-		ctx.lineTo(edge.vb.x, edge.vb.y);
-		ctx.stroke();
-	}
-}
-var generateHexCenterGrid = function(size, hex_extent_X, hex_extent_Y, offset_X, offset_Y){
-	//Debug canvas
-	var c = document.getElementById("canvas");
-	var ctx = c.getContext("2d");
-	ctx.fillStyle = "#0099FF"
-	//End debug
-	var height = Math.sqrt(3) * size;
-	var horiz = 1.5 * size;
-	var result = [];
-	var TwoSixthsPi = 2 * Math.PI / 6;
-	for(var j = 0; j < hex_extent_X; j++)
-	{
-		for(var i = 0; i < hex_extent_Y; i++)
-		{
-			var town = Math.random() < 0.10; //10% chance of a point being a town
-			var even = j%2==0?true:false;
-			var gen = {x: j * horiz + offset_X, y: i * height + (even?0:height/2) + offset_Y, isTown: town};
-			result.push(gen);
-			ctx.fillRect(gen.x-3.5, gen.y-3.5, 7, 7);
-			if(town) //Towns morph into 7 sub-points: the center and 6 radial districts
-			{
-				ctx.fillStyle = "#FF00FF"
-				//var disNum = Math.ceil(Math.random() * 6);
-				var disNum = 6;
-				var radOff = 0; //Math.random() * Math.PI;
-				for(var v = 0; v < disNum; v++)
-				{
-					var rad = v * 2 * Math.PI / disNum + radOff;
-					var district = {x: gen.x + size * Math.cos(rad) / 1.75, y: gen.y + size * Math.sin(rad) / 1.75};
-					result.push(district);
-					ctx.fillRect(district.x-1.5, district.y-1.5, 3, 3);
-				}
-				ctx.fillStyle = "#0099FF"
-			}
-		}
-	}
-	return result;
 }
