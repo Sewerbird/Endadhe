@@ -1,12 +1,70 @@
-<!DOCTYPE html>
 <html>
 	<head>
 		<title><%= title %></title>
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 	</head>
 	<body>
-		<h1>Endadhe - Sneaky Necromancer Redux</h3>
+		<h3>Endadhe - Sneaky Necromancer Redux</h3>
 		<div id="gameView" />
-		<script src="javascripts/client.js" />
+		<canvas id="canvas" width="800" height="800" />
+		<script type="text/javascript" src="/js/lib/rhill-voronoi-core.js"></script>
+		<script type="text/javascript" src="/js/lib/lodash.js"></script>
+		<script type="text/javascript" src="/js/client.js"></script>
+		<script type="text/javascript">
+			var hexes = [];
+			var minX = 1;
+			var minY = 0;
+			var maxX = 3;
+			var maxY = 2;
+			for(var i = minY; i < maxY; i ++)
+			{
+				for(var j = minX; j < maxX; j++)
+				{
+					hexes.push(new GameHex({coord:{x:j , y: i}}))
+				}
+			}
+			var you = new Necromancer({coord:{x:1,y:1}});
+			var canvas = document.getElementById("canvas")
+			var ctx = canvas.getContext("2d");
+			var renderer = setInterval("render()",10);
+			var simulator = setInterval("simulate()",1000);
+			function render(){
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				var zoom = 0.5;
+				for(var hex in hexes)
+				{
+					hexes[hex].render(canvas, hexes[hex].hexCoord, zoom ,{x:0, y:0});
+				}
+				you.render(canvas,you.hexCoord, zoom,{x:0, y:0});
+			}
+
+			// valid moves
+			var	neighbors = [
+				   {x:-1,  y:0},{x:0,y:-1},{x:1, y:-1},
+				   {x:-1,  y:1},{x:0, y:1},{x:1, y:0}
+				]
+			function simulate(){
+				var failedToMove = true;
+				//Move Necromancer
+				while(failedToMove)
+				{
+					var rand = Math.floor(Math.random() * neighbors.length);
+					var target = { 
+						x:you.hexCoord.x + neighbors[rand].x,
+						y:you.hexCoord.y + neighbors[rand].y
+					};
+					if(target.x >= maxX || target.x < minX || target.y >= maxY || target.y < minY)
+						failedToMove = true;
+					else
+					{
+						failedToMove = false;
+						you.hexCoord = target;
+					}
+				}
+				//Print out stuff about hex necromancer is in
+				var hex = _.find(hexes,function(hex){return _.isEqual(hex.hexCoord,you.hexCoord)})
+				console.log(hex.siteName);
+			}
+		</script>
 	</body>
 </html>
