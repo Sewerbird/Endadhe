@@ -7,70 +7,15 @@
 //   
 var GameHex = function(state){
 	var self = this;
-	self.population = {
-		good: {
-			villager_content: 0,
-			villager_scared: 0,
-			villager_militia: 0,
-			villager_hero: 0
-		},
-		evil: {
-			villager_slave: 0,
-			villager_cultist: 0,
-			villager_minion: 0,
-			necro_zombie: 0,
-			necro_skeleton: 0,
-			necro_wight: 0
-		},
-		resources: {
-			corpse_recent: 0,
-			corpse_old: 0,
-			corpse_husk: 0
-		}
-	}
-	var terrainTypes = [
-		{type:'Village',
-			color:function(){
-				//Fear map
-				var b = 0;
-				var r = Math.min(Math.max(0,Math.floor(200 * self.fear)),255);
-				var g = Math.min(Math.max(0,200 - r),255);
-
-				return "rgb("+r+","+g+","+b+")";
-			},
-			name:LangUtils.createRandomPolishSoundingPlaceName,
-			stealthRegainRate: -0.30,
-			populationSize: Math.floor(Math.random()*200)
-		},
-		{type:'Moor',
-			color:function(){return "#605030"},
-			name:function(){return ""},
-			stealthRegainRate: -0.1,
-			populationSize: Math.floor(Math.random()*200)
-		},
-		{type:'Forest',
-			color:function(){return "#105020"},
-			name:function(){return ""},
-			stealthRegainRate: 0.3,
-			populationSize: Math.floor(Math.random()*200)
-		},
-		{type:'Mountain',
-			color:function(){return "#405080"},
-			name:function(){return ""},
-			stealthRegainRate: 0.1,
-			populationSize: Math.floor(Math.random()*200)
-		}
-	]
-	var assignType = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
-	if(assignType.named) self.siteName = LangUtils.createRandomPolishSoundingPlaceName();
-	self.color = assignType.color;
-	self.fear = Math.random();
-	self.siteName = assignType.name();
-	self.type = assignType.type;
+	//Traits Determined by state
 	self.hexCoord = state.coord;
-	self.terrainType = assignType.onTerrain?assignType.onTerrain:assignType.type
-	self.populationSize = assignType.populationSize;
-	self.stealthRegainRate = assignType.stealthRegainRate;
+	self.fear = Math.random();
+	self.population = state.population;
+
+	//Traits determined by assign type
+	_.each(_.keys(state.type),function(key){self[key] = state.type[key]})
+	if(self.named && self.name) self.siteName = self.name();
+	console.log(self);
 }
 GameHex.prototype.simulate = function(hexes){
 	var self = this;
@@ -82,6 +27,7 @@ GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 {
 	if(!scaleSprite) scaleSprite = 1;
 	var self = this;
+	var populationSize = self.population.villagers;
 	var coordScale = 200 * scale; //Actual pixel width between each hex coord
 	var loc = HexMath.hexCoordToScreenCoord(coord, coordScale, offset);
 	var xOff = loc.x;
@@ -89,7 +35,7 @@ GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 	//Draw Hex
 	var grd=ctx.createLinearGradient(xOff+coordScale/2, yOff-2*coordScale, xOff-coordScale/2, yOff+2*coordScale);
 	grd.addColorStop(0, "white");
-	grd.addColorStop(1, this.color());
+	grd.addColorStop(1, self.color());
 	ctx.fillStyle=grd;
 	ctx.beginPath();
 	for(var i = 0; i < 6; i++)
@@ -114,7 +60,7 @@ GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 	ctx.textAlign = "center";
 	fontSize = Math.ceil(20 * scale * scaleSprite);
 	ctx.font = ""+fontSize+"px Arial";
-	ctx.fillText("("+self.terrainType+")", xOff, yOff+(20*scale * scaleSprite)); //(Site type)
+	ctx.fillText("("+self.type+")", xOff, yOff+(20*scale * scaleSprite)); //(Site type)
 	if(self.type == 'Village')
 	{
 		fontSize = Math.ceil(30 * scale * scaleSprite);
@@ -122,7 +68,7 @@ GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 		ctx.fillText(self.siteName,xOff,yOff); //Site name
 		fontSize = Math.ceil(25 * scale * scaleSprite);
 		ctx.font = "italic "+fontSize+"px Arial";
-		ctx.fillText("Pop: "+self.populationSize, xOff, yOff + (50*scale * scaleSprite));//Population
+		ctx.fillText("Pop: "+populationSize, xOff, yOff + (50*scale * scaleSprite));//Population
 		fontSize = Math.ceil(25 * scale * scaleSprite);
 		ctx.font = "italic "+fontSize+"px Arial";
 		ctx.fillText("Fear: "+Math.floor(self.fear * 100)+"%", xOff, yOff + (-45*scale * scaleSprite));//Fear
@@ -183,6 +129,57 @@ Necromancer.prototype.render = function(ctx, coord, scale, offset){
 	ctx.fill();
 	ctx.stroke();
 }
+//  ███████╗████████╗ █████╗ ████████╗███████╗    ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
+//  ██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝██╔════╝    ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
+//  ███████╗   ██║   ███████║   ██║   █████╗      █████╗  ███████║██║        ██║   ██║   ██║██████╔╝ ╚████╔╝ 
+//  ╚════██║   ██║   ██╔══██║   ██║   ██╔══╝      ██╔══╝  ██╔══██║██║        ██║   ██║   ██║██╔══██╗  ╚██╔╝  
+//  ███████║   ██║   ██║  ██║   ██║   ███████╗    ██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║  ██║   ██║   
+//  ╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+//   
+var StateFactory = function(params)
+{
+	var self = this;
+	self.terrainTypes = [
+		{type:'Village',
+			color:function(){
+				//Fear map
+				var b = 0;
+				var r = Math.min(Math.max(0,Math.floor(200 * this.fear)),255);
+				var g = Math.min(Math.max(0,200 - r),255);
+
+				return "rgb("+r+","+g+","+b+")";
+			},
+			name:LangUtils.createRandomPolishSoundingPlaceName,
+			named: true,
+			stealthRegainRate: -0.30
+		},
+		{type:'Moor',
+			color:function(){return "#605030"},
+			name:function(){return ""},
+			stealthRegainRate: -0.1
+		},
+		{type:'Forest',
+			color:function(){return "#105020"},
+			name:function(){return ""},
+			stealthRegainRate: 0.3
+		},
+		{type:'Mountain',
+			color:function(){return "#405080"},
+			name:function(){return ""},
+			stealthRegainRate: 0.1
+		}
+	]
+}
+StateFactory.prototype.randomHex = function(coord){
+	var self = this;
+	return new GameHex({
+		coord:coord, 
+		type: self.terrainTypes[Math.floor(Math.random() * self.terrainTypes.length)],
+		population:{
+			villagers: Math.floor(Math.random()*200)
+		}
+	})
+}
 //   ██████╗  █████╗ ███╗   ███╗███████╗
 //  ██╔════╝ ██╔══██╗████╗ ████║██╔════╝
 //  ██║  ███╗███████║██╔████╔██║█████╗  
@@ -192,6 +189,7 @@ Necromancer.prototype.render = function(ctx, coord, scale, offset){
 //    
 var Game = function(canvas, mapParams){
 	var self = this;
+	self.genner = new StateFactory();
 	self.player = new Necromancer({coord:{x:1,y:1}});
 	self.hexes = [];
 	self.mapParams = _.defaults(mapParams?mapParams:{},{
@@ -203,8 +201,7 @@ var Game = function(canvas, mapParams){
 	{
 		for(var i = self.mapParams.min.y - Math.floor(j/2); i < self.mapParams.max.y- Math.round(j/2); i++)
 		{
-			self.hexes.push(new GameHex({coord:{x:j , y: i}}))
-			console.log('x');
+			self.hexes.push(self.genner.randomHex({x:j , y: i}))
 		}
 	}
 	self.canvas = canvas;
@@ -250,21 +247,28 @@ Game.prototype.acceptUserInput = function(action){
 //   ╚═════╝    ╚═╝   ╚═╝╚══════╝╚══════╝
 // 
 var LangUtils = {
+	POL_params : {
+		adjChance : 0.1,
+		pre : ["Staro","War","Kru","Chełn","Lewo","Prawo","Przy","Zielona","Ogro"],
+		root : ["gród","wieś","ton","wnica","góra","szcz","mek","ki","szawa","mek"],
+		adj : ["Nowy","Stara","Dolny","Górny","Wielke"],
+		assemble : function(adj,prefix,root){return adj+prefix+root}
+	},
+	//Creates a random placename, assuming you can combinatorially combine 2-3 lists of morphemes into 1-2 words
+	createRandomPlaceName : function(params){
+		var adjChance = params.adjChance;
+		var rndAdjectives = Math.floor(Math.random()*params.adj.length);
+		var rndPrefixes = Math.floor(Math.random()*params.pre.length);
+		var rndRoots = Math.floor(Math.random()*params.root.length);
+
+		var adj = Math.random()<params.adjChance?params.adj[rndAdjectives]+" ":"";
+		var prefix = params.pre[rndPrefixes];
+		var root = params.root[rndRoots];
+
+		return params.assemble(adj,prefix,root);	
+	},
 	createRandomPolishSoundingPlaceName : function(){
-		var adjectives = ["Nowy","Stara","Dolny","Górny","Wielke"];
-		var prefixes = ["Staro","War","Kru","Chełn","Lewo","Prawo","Przy","Zielona","Ogro"];
-		var roots = ["gród","wieś","ton","wnica","góra","szcz","mek","ki","szawa","mek"];
-
-		var adjChance = 0.1
-		var rndAdjectives = Math.floor(Math.random()*adjectives.length);
-		var rndPrefixes = Math.floor(Math.random()*prefixes.length);
-		var rndRoots = Math.floor(Math.random()*roots.length);
-
-		var adj = Math.random()<adjChance?adjectives[rndAdjectives]+" ":"";
-		var prefix = prefixes[rndPrefixes];
-		var root = roots[rndRoots];
-
-		return adj+prefix+root;	
+		return LangUtils.createRandomPlaceName(LangUtils.POL_params);
 	}
 }
 var HexMath = {
