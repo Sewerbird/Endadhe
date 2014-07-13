@@ -15,19 +15,25 @@ var GameHex = function(state){
 	//Traits determined by assign type
 	_.each(_.keys(state.type),function(key){self[key] = state.type[key]})
 	if(self.named && self.name) self.siteName = self.name();
-	console.log(self);
 }
 GameHex.prototype.simulate = function(hexes){
 	var self = this;
-
-	self.fear *= 0.9;
+	_.each(self.population, function(seg,key){
+		if(seg.props && seg.props.scared){
+			var redux = Math.ceil(0.1 * seg.count);//Reduce percent scared by 10% each turn
+			self.population.transfer(redux, key, 'villager_content');
+		}
+	})
+	self.populationSize = _.reduce(_.pluck(_.where(self.population,{props : {good: true}}),'count'),function(sum,e){return sum + e});
+	self.cowerSize = _.reduce(_.pluck(_.where(self.population,{props : {scared: true}}),'count'),function(sum,e){return sum + e});
+	self.fear = (self.cowerSize+0.0)/(self.populationSize+0.0);
 }
 //Draw self at specified coord on canvas at a certain zoom scale
 GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 {
 	if(!scaleSprite) scaleSprite = 1;
 	var self = this;
-	var populationSize = self.population.villagers;
+	var populationSize = self.populationSize;
 	var coordScale = 200 * scale; //Actual pixel width between each hex coord
 	var loc = HexMath.hexCoordToScreenCoord(coord, coordScale, offset);
 	var xOff = loc.x;
@@ -68,10 +74,10 @@ GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 		ctx.fillText(self.siteName,xOff,yOff); //Site name
 		fontSize = Math.ceil(25 * scale * scaleSprite);
 		ctx.font = "italic "+fontSize+"px Arial";
-		ctx.fillText("Pop: "+populationSize, xOff, yOff + (50*scale * scaleSprite));//Population
+		ctx.fillText("Pop: "+self.cowerSize+"/"+self.populationSize, xOff, yOff + (50*scale * scaleSprite));//Population
 		fontSize = Math.ceil(25 * scale * scaleSprite);
 		ctx.font = "italic "+fontSize+"px Arial";
-		ctx.fillText("Fear: "+Math.floor(self.fear * 100)+"%", xOff, yOff + (-45*scale * scaleSprite));//Fear
+		ctx.fillText("Fear: "+Math.floor(100*self.fear)+"%", xOff, yOff + (-45*scale * scaleSprite));//Fear
 	}
 	fontSize = Math.ceil(50 * scale * scaleSprite);
 	ctx.font = "bold italic "+fontSize+"px Arial";
@@ -103,7 +109,7 @@ Necromancer.prototype.simulate = function(hexes){
 	if(hex.type == 'Village')
 	{	//Assume terrorizing
 		self.stealth = Math.max(0, self.stealth-0.40);
-		hex.fear += .15;
+		hex.population.transfer(15, 'villager_content', 'villager_scared');
 	}
 	else
 	{	//Assume hiding
@@ -170,15 +176,44 @@ var StateFactory = function(params)
 		}
 	]
 }
+StateFactory.prototype.randomPopulation = function(hex_type){
+	var population = new hexPopulation();
+	var pop = Math.floor(Math.random() * 200)
+	if(hex_type == 'Village') population.villager_content.count = pop;
+	if(hex_type == 'Village') population.villager_scared.count = pop - Math.floor(Math.random() * pop);
+	return population;
+}
 StateFactory.prototype.randomHex = function(coord){
 	var self = this;
-	return new GameHex({
+	var result =  new GameHex({
 		coord:coord, 
 		type: self.terrainTypes[Math.floor(Math.random() * self.terrainTypes.length)],
-		population:{
-			villagers: Math.floor(Math.random()*200)
-		}
 	})
+	result.population = self.randomPopulation(result.type)
+	return result;
+}
+
+var hexPopulation = function(state){
+	return {
+		villager_content : {props: {good: true}, count : 0, actors : []},
+		villager_scared : {props: {good: true, scared:true}, count : 0, actors : []},
+		villager_slave : {props: {good: true, scared:true}, count : 0, actors : []},
+		villager_militia : {props: {good: true}, count : 0, actors : []},
+		villager_hero : {props: {good: true}, count : 0, actors : []},
+		villager_cultist : {props: {good: false}, count : 0, actors : []},
+		corpse_recent : {count: 0},
+		corpse_old : {count: 0},
+		corpse_ancient : {count: 0},
+		monster_zombie : {props: {good: false}, count : 0, actors : []},
+		monster_skeleton : {props: {good: false}, count : 0, actors : []},
+		monster_wight : {props: {good: false}, count : 0, actors : []},
+		transfer : function(num, src, dest){
+			if(num > this[src].count) num = this[src].count;
+			if(!num) return;
+			this[src].count -= num;
+			this[dest].count += num;
+		}
+	}
 }
 //   ██████╗  █████╗ ███╗   ███╗███████╗
 //  ██╔════╝ ██╔══██╗████╗ ████║██╔════╝
