@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"POL",
+				"POL_adjChance"
+			],
+			[
+				"ran",
+				"randomHex"
+			],
+			[
+				"hex",
+				"hexCoordToScreenCoord"
+			],
+			[
 				"hex_e",
 				"hex_extent_X"
 			],
@@ -196,34 +208,10 @@
 			}
 		},
 		{
-			"file": "/Users/edwardmiller/Desktop/Endadhe/package.json",
-			"settings":
-			{
-				"buffer_size": 355,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/edwardmiller/Desktop/Endadhe/bin/www",
-			"settings":
-			{
-				"buffer_size": 263,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/edwardmiller/Desktop/Endadhe/app.js",
-			"settings":
-			{
-				"buffer_size": 1445,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 			"settings":
 			{
-				"buffer_size": 534,
+				"buffer_size": 1132,
 				"line_ending": "Unix"
 			}
 		},
@@ -231,23 +219,7 @@
 			"file": "client.js",
 			"settings":
 			{
-				"buffer_size": 2877,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/rhill-voronoi-core.js",
-			"settings":
-			{
-				"buffer_size": 43824,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/monstercore.js",
-			"settings":
-			{
-				"buffer_size": 11424,
+				"buffer_size": 15019,
 				"line_ending": "Unix"
 			}
 		}
@@ -276,11 +248,18 @@
 	},
 	"file_history":
 	[
+		"/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/monstercore.js",
+		"/Users/edwardmiller/Desktop/Endadhe/package.json",
+		"/Users/edwardmiller/Desktop/Endadhe/bin/www",
+		"/Users/edwardmiller/Desktop/Endadhe/app.js",
+		"/Users/edwardmiller/Desktop/Endadhe/routes/index.js",
+		"/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/rhill-voronoi-core.js",
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/data/terrainType.json",
+		"/Users/edwardmiller/Desktop/Endadhe/.gitignore",
 		"/Users/edwardmiller/Desktop/Endadhe/Gruntfile.js",
 		"/Users/edwardmiller/Desktop/Endadhe/public/js/client.js",
 		"/Users/edwardmiller/Desktop/Endadhe/public/javascripts/client.bundle.js",
 		"/Users/edwardmiller/Desktop/fuilbarrantas/public 2/index.html",
-		"/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/monstercore.js",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/views/header.ejs",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/views/admin.ejs",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/views/adminData.ejs",
@@ -290,10 +269,7 @@
 		"/Users/edwardmiller/Desktop/Backwi.re/HyperstoreQAModule/index.html",
 		"/Users/edwardmiller/Desktop/Endadhe/public/endadhe.html",
 		"/Users/edwardmiller/Desktop/Endadhe/node_modules/express/package.json",
-		"/Users/edwardmiller/Desktop/Endadhe/routes/index.js",
 		"/Users/edwardmiller/Desktop/Endadhe/public/client.js",
-		"/Users/edwardmiller/Desktop/Endadhe/package.json",
-		"/Users/edwardmiller/Desktop/Endadhe/app.js",
 		"/Users/edwardmiller/Desktop/Ed Aerospace Naming Scheme",
 		"/Users/edwardmiller/Desktop/fuilbarrantas/public/js/game-viewport.js",
 		"/Users/edwardmiller/Desktop/fuilbarrantas/public/stylesheets/style.css",
@@ -418,6 +394,13 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"render",
+			"siteName",
+			"mapSize",
+			"[a-zA-z]+\":",
+			"[a-zA-z]+:",
+			"{type",
+			"'",
 			"terrainbit",
 			"getTurn",
 			"findUID",
@@ -538,19 +521,12 @@
 			"__",
 			"getLoginApp",
 			"getLoginApplic",
-			"getLoginApp",
-			"this.cookieName",
-			"that.cookieName",
-			"that.cookie.get",
-			"that.cookieName",
-			"that.getLoginApp()",
-			"getLoginApp()",
-			"loginToken:"
+			"getLoginApp"
 		],
 		"highlight": true,
-		"in_selection": true,
+		"in_selection": false,
 		"preserve_case": false,
-		"regex": false,
+		"regex": true,
 		"replace_history":
 		[
 			"self",
@@ -565,7 +541,7 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -596,100 +572,18 @@
 				},
 				{
 					"buffer": 1,
-					"file": "/Users/edwardmiller/Desktop/Endadhe/package.json",
-					"settings":
-					{
-						"buffer_size": 355,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "/Users/edwardmiller/Desktop/Endadhe/bin/www",
-					"settings":
-					{
-						"buffer_size": 263,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								131,
-								131
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "/Users/edwardmiller/Desktop/Endadhe/app.js",
-					"settings":
-					{
-						"buffer_size": 1445,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								323,
-								323
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 35.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
 					"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 					"settings":
 					{
-						"buffer_size": 534,
+						"buffer_size": 1132,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								502,
-								502
+								1048,
+								1048
 							]
 						],
 						"settings":
@@ -704,19 +598,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 2,
 					"file": "client.js",
 					"settings":
 					{
-						"buffer_size": 2877,
+						"buffer_size": 15019,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2064,
-								2064
+								9807,
+								9807
 							]
 						],
 						"settings":
@@ -725,61 +619,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 525.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/rhill-voronoi-core.js",
-					"settings":
-					{
-						"buffer_size": 43824,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 11643.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/monstercore.js",
-					"settings":
-					{
-						"buffer_size": 11424,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7069,
-								6669
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2956.0,
+						"translation.y": 3692.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -830,7 +670,7 @@
 		[
 			[
 				"",
-				"/Users/edwardmiller/Desktop/Hackathon/Notes"
+				"/Users/edwardmiller/Desktop/Endadhe/views/index.ejs"
 			],
 			[
 				"ca",

@@ -99,6 +99,7 @@ var Necromancer = function(state){
 		var k = Math.round(Math.max(Math.min(self.stealth*200,255),0));
 		return "rgb("+0+","+k+","+k+")";
 	}
+	self.actions = ['move','hide']
 }
 Necromancer.prototype.simulate = function(hexes){
 	var self = this;
@@ -157,22 +158,26 @@ var StateFactory = function(params)
 			},
 			name:LangUtils.createRandomPolishSoundingPlaceName,
 			named: true,
-			stealthRegainRate: -0.30
+			stealthRegainRate: -0.30,
+			actions: ['shop','infiltrate','terrorize','besiege']
 		},
 		{type:'Moor',
 			color:function(){return "#605030"},
 			name:function(){return ""},
-			stealthRegainRate: -0.1
+			stealthRegainRate: -0.1,
+			actions: []
 		},
 		{type:'Forest',
 			color:function(){return "#105020"},
 			name:function(){return ""},
-			stealthRegainRate: 0.3
+			stealthRegainRate: 0.3,
+			actions: []
 		},
 		{type:'Mountain',
 			color:function(){return "#405080"},
 			name:function(){return ""},
-			stealthRegainRate: 0.1
+			stealthRegainRate: 0.1,
+			actions: []
 		}
 	]
 }
@@ -215,6 +220,86 @@ var hexPopulation = function(state){
 		}
 	}
 }
+//   ██████╗  █████╗ ███╗   ███╗███████╗    ██╗   ██╗██╗███████╗██╗    ██╗
+//  ██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██║   ██║██║██╔════╝██║    ██║
+//  ██║  ███╗███████║██╔████╔██║█████╗      ██║   ██║██║█████╗  ██║ █╗ ██║
+//  ██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ╚██╗ ██╔╝██║██╔══╝  ██║███╗██║
+//  ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗     ╚████╔╝ ██║███████╗╚███╔███╔╝
+//   ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝      ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ 
+//  
+var GameView = function(canvas, game){
+	var self = this;
+	//Target
+	self.game = game;
+	//Viewport
+	self.canvas = canvas;
+	self.ctx = self.canvas.getContext("2d");
+	self.viewPortZoom = 1.0;
+	self.viewPortOffset = {x:0,y:0};
+	//Implements zooming viewport on game
+	self.canvas.addEventListener('mousewheel', function(e){
+		e.preventDefault();
+		//Figure zoomfactor
+		var origZoom = self.viewPortZoom;
+		self.viewPortZoom += (e.wheelDeltaY?(e.wheelDeltaY<0?-1:1):undefined)/10
+		if(self.viewPortZoom < 0.31) self.viewPortZoom = 0.3;
+		if(self.viewPortZoom > 1.49) self.viewPortZoom = 1.5;
+		if(!self.viewPortZoom) self.viewPortZoom = 0.4;
+		//Figure zoom offset to stay centered
+		var c_w = canvas.scrollWidth;
+		var c_h = canvas.scrollHeight;
+		self.viewPortOffset.x -= (c_w * self.viewPortZoom - c_w * origZoom)/2;
+		self.viewPortOffset.y -= (c_h * self.viewPortZoom - c_h * origZoom)/2;
+		self.render();
+	}, false);
+	//Implements dragging viewport over game
+	self.clickDown = undefined;
+	self.gameDragListener = null;
+	var onGamePan = function(e){
+		var dragDown = {x:e.x, y:e.y};
+		self.viewPortOffset.x -= self.clickDown.x - dragDown.x;
+		self.viewPortOffset.y -= self.clickDown.y - dragDown.y;
+		self.clickDown = dragDown;
+		self.render();
+	}
+	self.canvas.addEventListener('mousedown', function(e){
+		self.clickDown = {x:e.x, y: e.y};
+		self.gameDragListener = onGamePan;
+		self.canvas.addEventListener('mousemove',self.gameDragListener, false);
+	}, false);
+	self.canvas.addEventListener('mouseup', function(e){
+		self.canvas.removeEventListener('mousemove',self.gameDragListener, false);
+		self.gameDragListener = null;
+		self.clickDown = undefined;
+	}, false);
+	//Implements right-clicking a game object
+	self.canvas.addEventListener('mouseup', function(e){
+		if(e.which == 3)//right click
+		{
+			e.preventDefault();
+			self.clickUp = {x: e.x, y: e.y};
+			var hexcoord = HexMath.screenCoordToHexCoord(self.clickUp,self.viewPortZoom,self.viewPortOffset)
+			console.log('actions at '+JSON.stringify(_.values(hexcoord))+':',self.game.getPlayerActionsForHex(hexcoord));
+			return false;
+		}
+	}, false)
+
+	//Initial render
+	self.render();
+}
+GameView.prototype.render = function(){
+	var self = this;
+
+	//Clear
+	self.ctx.clearRect(0, 0, canvas.width, canvas.height);
+	//Tell game to render
+	game.render(self.ctx, self.viewPortZoom, self.viewPortOffset);
+	//TODO: Tell UI to render
+}
+GameView.prototype.acceptUserInput = function(input){
+	game.acceptUserInput(input);
+	this.render();
+}
 //   ██████╗  █████╗ ███╗   ███╗███████╗
 //  ██╔════╝ ██╔══██╗████╗ ████║██╔════╝
 //  ██║  ███╗███████║██╔████╔██║█████╗  
@@ -222,7 +307,7 @@ var hexPopulation = function(state){
 //  ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗
 //   ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 //    
-var Game = function(canvas, mapParams){
+var Game = function(mapParams){
 	var self = this;
 	self.genner = new StateFactory();
 	self.player = new Necromancer({coord:{x:1,y:1}});
@@ -239,22 +324,15 @@ var Game = function(canvas, mapParams){
 			self.hexes.push(self.genner.randomHex({x:j , y: i}))
 		}
 	}
-	self.canvas = canvas;
-	self.render()
 }
 Game.prototype.simulate = function(){
 	var self = this;
 	//Simulate game elements
-	_.each(self.hexes,function(hex){hex.simulate(self.hexes)});
 	self.player.simulate(self.hexes);
+	_.each(self.hexes,function(hex){hex.simulate(self.hexes)});
 }
-Game.prototype.render = function(){	
+Game.prototype.render = function(ctx, zoom, offset){	
 	var self = this;
-	//Setup view context
-	var ctx = self.canvas.getContext("2d");
-	var zoom = 0.4;
-	var offset = {x:40, y:40};
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	//Render game elements
 	_.each(self.hexes,function(hex){hex.render(ctx, hex.hexCoord, zoom, offset)})
 	self.player.render(ctx, self.player.hexCoord, zoom, offset);
@@ -268,11 +346,23 @@ Game.prototype.acceptUserInput = function(action){
 		   {x:-1,  y:1},{x:0, y:1},{x:1, y:0}
 		]
 	var dir = action.playerAvatarDirection;
-	var target = {x:game.player.hexCoord.x + neighbors[dir].x, y:game.player.hexCoord.y + neighbors[dir].y};
-	if(_.find(game.hexes,function(hex){return _.isEqual(hex.hexCoord, target)})) game.player.willMoveTo = target;
+	var target = {x:self.player.hexCoord.x + neighbors[dir].x, y:self.player.hexCoord.y + neighbors[dir].y};
+	if(_.find(self.hexes,function(hex){return _.isEqual(hex.hexCoord, target)})) self.player.willMoveTo = target;
 	//TODO: New turn on every user input for now: eventually will be based on 'Next Turn' button
-	self.simulate();	
-	self.render();
+	self.simulate();
+}
+Game.prototype.getPlayerActionsForHex = function(hexCoord){
+	var self = this;
+	var actions = [];
+	if(_.isEqual(hexCoord,self.player.hexCoord))
+	{
+		//Player actions
+		actions = _.union(actions,self.player.actions);
+		//Location actions
+		var loc = _.find(self.hexes, function(hex){return _.isEqual(hex.hexCoord, hexCoord)});
+		if(loc) actions = _.union(actions,loc.actions);
+	}
+	return actions;
 }
 //  ██╗   ██╗████████╗██╗██╗     ███████╗
 //  ██║   ██║╚══██╔══╝██║██║     ██╔════╝
@@ -309,6 +399,7 @@ var LangUtils = {
 var HexMath = {
 	screenCoordToHexCoord : function(point, scale, offset){
 		var self = this;
+		if(!point || !offset) return undefined;
 		//TODO: this is not wholly correct, but rough. Each hex has a square selecting area
 		var pX = point.x - offset.x;
 		var pY = point.y - offset.y;

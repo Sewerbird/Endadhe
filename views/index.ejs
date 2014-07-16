@@ -12,7 +12,8 @@
 		<script type="text/javascript" src="/js/lib/jquery-1.11.0.min.js"></script>
 		<script type="text/javascript">
 			//Instantiate Game
-			var game = new Game(canvas);
+			var game = new Game();
+			var gameView = new GameView(canvas, game);
 			//Handle browser input
 			document.getElementById("canvas").focus();
 			$( "#canvas" ).keydown(function(e) {
@@ -25,8 +26,10 @@
 					69 : 2 	//upper right
 				}
 				dir = mapping[e.which] || mapping[e.which]===0?mapping[e.which]:3;//default to 'stay' if other key pressed
-				game.acceptUserInput({playerAvatarDirection: dir});
+				gameView.acceptUserInput({playerAvatarDirection: dir});
 			});
+			//Disable context menu on game
+			document.oncontextmenu = function(){return false;}
 		</script>
 	</body>
 </html>
