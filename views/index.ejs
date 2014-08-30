@@ -5,31 +5,24 @@
 	</head>
 	<body>
 		<h3>Endadhe - Sneaky Necromancer Redux</h3>
-		<canvas id="canvas" width="800" height="500" tabindex="1"/>
+		<canvas id="canvas" width="800" height="400" tabindex="1"/>
+		<script data-main="js/game" src="js/require.js"></script>
 		<script type="text/javascript" src="/js/lib/rhill-voronoi-core.js"></script>
 		<script type="text/javascript" src="/js/lib/lodash.js"></script>
-		<script type="text/javascript" src="/js/client.js"></script>
+		<!--script type="text/javascript" src="/js/client.js"></script-->
+		<script type="text/javascript" src="/js/game.js"></script>
 		<script type="text/javascript" src="/js/lib/jquery-1.11.0.min.js"></script>
+		<script type="text/javascript" src="/js/eventer.js"></script>
+		<script type="text/javascript" src="/js/torrentBar.js"></script>
 		<script type="text/javascript">
-			//Instantiate Game
-			var game = new Game();
-			var gameView = new GameView(canvas, game);
+			var game = generateInitialState();
+			var cameraView = new CameraView(canvas, game);
 			//Handle browser input
 			document.getElementById("canvas").focus();
-			$( "#canvas" ).keydown(function(e) {
-				var mapping = {
-					68 : 6, //lower right
-					65 : 4, //lower left
-					83 : 5, //down
-					87 : 1, //upper left
-					81 : 0, //up
-					69 : 2 	//upper right
-				}
-				dir = mapping[e.which] || mapping[e.which]===0?mapping[e.which]:3;//default to 'stay' if other key pressed
-				gameView.acceptUserInput({playerAvatarDirection: dir});
-			});
-			//Disable context menu on game
-			document.oncontextmenu = function(){return false;}
+			var simTimer = setInterval(function(){
+				simulateGameState(game,game,0.1);
+				cameraView.render();
+			},100)
 		</script>
 	</body>
 </html>

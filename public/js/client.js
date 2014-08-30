@@ -29,13 +29,12 @@ GameHex.prototype.simulate = function(hexes){
 	self.fear = (self.cowerSize+0.0)/(self.populationSize+0.0);
 }
 //Draw self at specified coord on canvas at a certain zoom scale
-GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
+GameHex.prototype.render = function(ctx, coord, scale, offset)
 {
-	if(!scaleSprite) scaleSprite = 1;
 	var self = this;
 	var populationSize = self.populationSize;
-	var coordScale = 200 * scale; //Actual pixel width between each hex coord
-	var loc = HexMath.hexCoordToScreenCoord(coord, coordScale, offset);
+	var coordScale = 200; //Hex radius
+	var loc = HexMath.hexCoordToScreenCoord(coord, coordScale, offset, scale);
 	var xOff = loc.x;
 	var yOff = loc.y;
 	//Draw Hex
@@ -47,8 +46,8 @@ GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 	for(var i = 0; i < 6; i++)
 	{
 		var angle = 2 * Math.PI / 6 * i;
-		x_i = coordScale * scaleSprite * Math.cos(angle) + xOff;
-		y_i = coordScale * scaleSprite * Math.sin(angle) + yOff;
+		x_i = coordScale * scale * Math.cos(angle) + xOff;
+		y_i = coordScale * scale * Math.sin(angle) + yOff;
 		if(i == 0)
 			ctx.moveTo(x_i, y_i);
 		else
@@ -57,32 +56,36 @@ GameHex.prototype.render = function(ctx, coord, scale, offset, scaleSprite)
 		}
 	}
 	ctx.closePath();
-	ctx.lineWidth = 5 * scale * scaleSprite;
-	ctx.strokeStyle = 'gray';
+	ctx.lineWidth = 5 * scale;
+
+	if(self.isHighlighted)
+		ctx.strokeStyle = 'cyan';
+	else
+		ctx.strokeStyle = 'gray';
 	ctx.fill();
 	ctx.stroke();
 	//Draw text on hex
 	ctx.fillStyle='black'
 	ctx.textAlign = "center";
-	fontSize = Math.ceil(20 * scale * scaleSprite);
+	fontSize = Math.ceil(20 * scale);
 	ctx.font = ""+fontSize+"px Arial";
-	ctx.fillText("("+self.type+")", xOff, yOff+(20*scale * scaleSprite)); //(Site type)
+	ctx.fillText("("+self.type+")", xOff, yOff+(20*scale)); //(Site type)
 	if(self.type == 'Village')
 	{
-		fontSize = Math.ceil(30 * scale * scaleSprite);
+		fontSize = Math.ceil(30 * scale);
 		ctx.font = "bold "+fontSize+"px Arial";
 		ctx.fillText(self.siteName,xOff,yOff); //Site name
-		fontSize = Math.ceil(25 * scale * scaleSprite);
+		fontSize = Math.ceil(25 * scale);
 		ctx.font = "italic "+fontSize+"px Arial";
-		ctx.fillText("Pop: "+self.cowerSize+"/"+self.populationSize, xOff, yOff + (50*scale * scaleSprite));//Population
-		fontSize = Math.ceil(25 * scale * scaleSprite);
+		ctx.fillText("Pop: "+self.cowerSize+"/"+self.populationSize, xOff, yOff + (50*scale));//Population
+		fontSize = Math.ceil(25 * scale);
 		ctx.font = "italic "+fontSize+"px Arial";
-		ctx.fillText("Fear: "+Math.floor(100*self.fear)+"%", xOff, yOff + (-45*scale * scaleSprite));//Fear
+		ctx.fillText("Fear: "+Math.floor(100*self.fear)+"%", xOff, yOff + (-45*scale));//Fear
 	}
-	fontSize = Math.ceil(50 * scale * scaleSprite);
+	fontSize = Math.ceil(50 * scale);
 	ctx.font = "bold italic "+fontSize+"px Arial";
 	ctx.fillStyle = 'rgba(255,255,255,0.3)'
-	ctx.fillText(JSON.stringify(_.values(self.hexCoord)),xOff, yOff + (150 * scale * scaleSprite));
+	ctx.fillText(JSON.stringify(_.values(self.hexCoord)),xOff, yOff + (150 * scale));
 }
 //  ███╗   ██╗███████╗ ██████╗██████╗  ██████╗ ███╗   ███╗ █████╗ ███╗   ██╗ ██████╗███████╗██████╗ 
 //  ████╗  ██║██╔════╝██╔════╝██╔══██╗██╔═══██╗████╗ ████║██╔══██╗████╗  ██║██╔════╝██╔════╝██╔══██╗
@@ -120,8 +123,8 @@ Necromancer.prototype.simulate = function(hexes){
 Necromancer.prototype.render = function(ctx, coord, scale, offset){
 	var self = this;
 
-	var coordScale = 200 * scale; //Actual pixel width between each hex coord
-	var loc = HexMath.hexCoordToScreenCoord(coord, coordScale, offset);
+	var coordScale = 200; //Actual pixel width between each hex coord
+	var loc = HexMath.hexCoordToScreenCoord(coord, coordScale, offset, scale);
 	var xOff = loc.x;
 	var yOff = loc.y + 50 * scale;
 
@@ -248,9 +251,10 @@ var GameView = function(canvas, game){
 		//Figure zoom offset to stay centered
 		var c_w = canvas.scrollWidth;
 		var c_h = canvas.scrollHeight;
-		self.viewPortOffset.x -= (c_w * self.viewPortZoom - c_w * origZoom)/2;
-		self.viewPortOffset.y -= (c_h * self.viewPortZoom - c_h * origZoom)/2;
+		//self.viewPortOffset.x -= (c_w * self.viewPortZoom - c_w * origZoom)/2;
+		//self.viewPortOffset.y -= (c_h * self.viewPortZoom - c_h * origZoom)/2;
 		self.render();
+		console.log(self.viewPortZoom);
 	}, false);
 	//Implements dragging viewport over game
 	self.clickDown = undefined;
@@ -278,9 +282,16 @@ var GameView = function(canvas, game){
 		{
 			e.preventDefault();
 			self.clickUp = {x: e.x, y: e.y};
-			var hexcoord = HexMath.screenCoordToHexCoord(self.clickUp,self.viewPortZoom,self.viewPortOffset)
+			var hexcoord = HexMath.screenCoordToHexCoord(self.clickUp,200,self.viewPortOffset,self.viewPortZoom)
 			console.log('actions at '+JSON.stringify(_.values(hexcoord))+':',self.game.getPlayerActionsForHex(hexcoord));
+			self.render();
 			return false;
+		}
+		else
+		{
+			self.clickUp = {x: e.x, y: e.y};
+			var hexcoord = HexMath.screenCoordToHexCoord(self.clickUp,200,self.viewPortOffset,self.viewPortZoom)
+			console.log(hexcoord);
 		}
 	}, false)
 
@@ -294,6 +305,16 @@ GameView.prototype.render = function(){
 	self.ctx.clearRect(0, 0, canvas.width, canvas.height);
 	//Tell game to render
 	game.render(self.ctx, self.viewPortZoom, self.viewPortOffset);
+	self.ctx.beginPath()
+	self.ctx.strokeStyle = 'cyan';
+	self.ctx.lineWidth = 2;
+	self.ctx.lineTo(canvas.width/2 + 10, canvas.height/2);
+	self.ctx.lineTo(canvas.width/2, canvas.height/2 +10);
+	self.ctx.lineTo(canvas.width/2 -10, canvas.height/2);
+	self.ctx.lineTo(canvas.width/2, canvas.height/2 - 10);
+	self.ctx.lineTo(canvas.width/2 +10, canvas.height/2);
+	self.ctx.closePath();
+	self.ctx.stroke();
 	//TODO: Tell UI to render
 }
 GameView.prototype.acceptUserInput = function(input){
@@ -354,14 +375,18 @@ Game.prototype.acceptUserInput = function(action){
 Game.prototype.getPlayerActionsForHex = function(hexCoord){
 	var self = this;
 	var actions = [];
-	if(_.isEqual(hexCoord,self.player.hexCoord))
-	{
+	//if(_.isEqual(hexCoord,self.player.hexCoord))
+	//{
 		//Player actions
 		actions = _.union(actions,self.player.actions);
 		//Location actions
-		var loc = _.find(self.hexes, function(hex){return _.isEqual(hex.hexCoord, hexCoord)});
-		if(loc) actions = _.union(actions,loc.actions);
-	}
+		var loc = _.find(self.hexes, function(hex){isHighlighted = false; return _.isEqual(hex.hexCoord, hexCoord)});
+		if(loc) 
+		{
+			actions = _.union(actions,loc.actions);
+			loc.isHighlighted = true;
+		}
+	//}
 	return actions;
 }
 //  ██╗   ██╗████████╗██╗██╗     ███████╗
@@ -397,28 +422,31 @@ var LangUtils = {
 	}
 }
 var HexMath = {
-	screenCoordToHexCoord : function(point, scale, offset){
+	screenCoordToHexCoord : function(point, coordScale, offset, scale){
+		var viewWidth = 800
+		var viewHeight = 500
 		var self = this;
 		if(!point || !offset) return undefined;
 		//TODO: this is not wholly correct, but rough. Each hex has a square selecting area
-		var pX = point.x - offset.x;
-		var pY = point.y - offset.y;
-		var coordScale = 200 * scale;
-		var horiz = 1.5 * coordScale;
-		var height = Math.sqrt(3) * coordScale;
+		var pX = point.x  - viewWidth/2 - offset.x * scale;
+		var pY = point.y - viewHeight/2 - offset.y * scale;
+		var horiz = 1.5 * coordScale * scale;
+		var height = Math.sqrt(3) * coordScale * scale;
 		//Get a rough guess
-		var near_x = (pX)/horiz;
-		var near_y = (pY)/height - Math.round(near_x)/2;
+		var near_x = (pX)/horiz
+		var near_y = (pY)/height - Math.round(near_x/2);
 		var near = {x:near_x, y:near_y};
 		var round = {x:Math.round(near_x), y:Math.round(near_y)}
 		if(round.x==-0)round.x=0;
 		if(round.y==-0)round.y=0;
 		return round;
 	},
-	hexCoordToScreenCoord : function(coord, scale, offset){
-		//scale is the scaled radius
-		var horiz = 1.5 * scale;
-		var height = Math.sqrt(3) * scale;
-		return {x: coord.x * horiz + offset.x, y: coord.y * height + coord.x * height/2 + offset.y}
+	hexCoordToScreenCoord : function(coord, coordScale, offset, scale){
+		var viewWidth = 800
+		var viewHeight = 500
+		return {
+			x: coordScale * 1.5 * coord.x * scale + viewWidth/2 + offset.x * scale,
+			y: coordScale * Math.sqrt(3) * (coord.y + coord.x/2) * scale + viewHeight/2 + offset.y * scale
+		}
 	}
 }

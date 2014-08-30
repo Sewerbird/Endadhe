@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"pixel",
+				"pixelToMeterRatio"
+			],
+			[
 				"POL",
 				"POL_adjChance"
 			],
@@ -203,7 +207,7 @@
 			"file": "/Users/edwardmiller/Desktop/Endadhe/README.md",
 			"settings":
 			{
-				"buffer_size": 45,
+				"buffer_size": 1049,
 				"line_ending": "Unix"
 			}
 		},
@@ -211,15 +215,23 @@
 			"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 			"settings":
 			{
-				"buffer_size": 1132,
+				"buffer_size": 919,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client.js",
+			"file": "game.js",
 			"settings":
 			{
-				"buffer_size": 15019,
+				"buffer_size": 7778,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "//Finite State Machine\n\nvar FiniteState = function(){\n	\n}\n\nFiniteState.prototype.enter = function(){\n\n}\n\nFiniteState.prototype.exit = function(){\n\n}\n\nFiniteState.prototype.execute = function(){\n	\n}",
+			"settings":
+			{
+				"buffer_size": 197,
 				"line_ending": "Unix"
 			}
 		}
@@ -248,6 +260,7 @@
 	},
 	"file_history":
 	[
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/client.js",
 		"/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/monstercore.js",
 		"/Users/edwardmiller/Desktop/Endadhe/package.json",
 		"/Users/edwardmiller/Desktop/Endadhe/bin/www",
@@ -257,7 +270,6 @@
 		"/Users/edwardmiller/Desktop/Endadhe/public/js/data/terrainType.json",
 		"/Users/edwardmiller/Desktop/Endadhe/.gitignore",
 		"/Users/edwardmiller/Desktop/Endadhe/Gruntfile.js",
-		"/Users/edwardmiller/Desktop/Endadhe/public/js/client.js",
 		"/Users/edwardmiller/Desktop/Endadhe/public/javascripts/client.bundle.js",
 		"/Users/edwardmiller/Desktop/fuilbarrantas/public 2/index.html",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/views/header.ejs",
@@ -379,7 +391,7 @@
 	],
 	"find":
 	{
-		"height": 35.0
+		"height": 43.0
 	},
 	"find_in_files":
 	{
@@ -394,6 +406,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"800",
+			"screenCoordToHex",
+			"hexCoordToScreenCoord",
+			"screenCoordTo",
+			"screenCoord",
 			"render",
 			"siteName",
 			"mapSize",
@@ -516,12 +533,7 @@
 			"storePairTo",
 			"storePair",
 			"store",
-			"_storePair",
-			"that.cookie.set",
-			"__",
-			"getLoginApp",
-			"getLoginApplic",
-			"getLoginApp"
+			"_storePair"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -549,15 +561,15 @@
 					"file": "/Users/edwardmiller/Desktop/Endadhe/README.md",
 					"settings":
 					{
-						"buffer_size": 45,
+						"buffer_size": 1049,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								45,
-								45
+								1049,
+								1049
 							]
 						],
 						"settings":
@@ -575,15 +587,15 @@
 					"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 					"settings":
 					{
-						"buffer_size": 1132,
+						"buffer_size": 919,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1048,
-								1048
+								580,
+								580
 							]
 						],
 						"settings":
@@ -599,18 +611,18 @@
 				},
 				{
 					"buffer": 2,
-					"file": "client.js",
+					"file": "game.js",
 					"settings":
 					{
-						"buffer_size": 15019,
+						"buffer_size": 7778,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								9807,
-								9807
+								3513,
+								3513
 							]
 						],
 						"settings":
@@ -619,7 +631,32 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 3692.0,
+						"translation.y": 283.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"settings":
+					{
+						"buffer_size": 197,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								195,
+								195
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
