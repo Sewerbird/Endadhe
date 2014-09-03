@@ -1,4 +1,3 @@
-
 /*
 	function generateInitialState(params)
 
@@ -20,39 +19,20 @@
  	*/
  	var state = {
  		entities : {},
- 		tiles : [],
+ 		terrain : new tileTerrainState(worldExtent, trulyRandomTileFactory),
  		uid : generateUUID()
  	};
  	//Add villagers
- 	_.times(1000, function(){
- 		state.entities[generateUUID()] = randomEntity({alignment:'good', entity_subclass:'Villager', entity_class:'Denizen'})
+ 	_.times(10, function(){
+ 		var villager = randomEntity({alignment:'good', entity_subclass:'Villager', entity_class:'Denizen'})
+ 		state.entities[generateUUID()] = placeOnNearestTile(villager,villager.position.x,villager.position.y)
  	})
- 	//Add houses
- 	for(var i = 0; i < Math.ceil(worldExtent.x/tileSize); i ++)
- 	{
- 		for(var j = 0; j < Math.ceil(worldExtent.y/tileSize)+1; j ++)
- 		{	
- 			if(Math.random() < 0.05)
- 			state.entities[generateUUID()] = newTile(
- 				{x:i, y:j - (i%2==0?0.5:0),entity_subclass:'Structure',entity_class:'House', render_image: assets['house'], simulate:function(){}});
- 		}
- 	}
-
- 	//Add tiles
- 	for(var i = 0; i < Math.ceil(worldExtent.x/tileSize); i ++)
- 	{
- 		for(var j = 0; j < Math.ceil(worldExtent.y/tileSize)+1; j ++)
- 		{
- 			state.tiles.push(newTile({x:i, y:j - (i%2==0?0.5:0)}));
- 		}
- 	}
-	console.log(state);
  	return state;
 }
 function randomEntity(params){
 	return _.defaults(params,
 		{
-			position: {x:(Math.random()*0.6+0.2) * worldExtent.x, y:(Math.random()*0.6+0.2) * worldExtent.y},
+			position: {x:Math.random() * worldExtent.x, y:Math.random() * worldExtent.y},
 			entity_class: 'Denizen',
 			entity_subclass: 'Villager',
 			render_image: assets['denizen'],
@@ -61,29 +41,16 @@ function randomEntity(params){
 				ctx.drawImage(
 					this.render_image,
 					locus.x-this.render_image.mW/2.0*locus.scale,
-					locus.y-this.render_image.mH*locus.scale,
+					locus.y-this.render_image.mH/2.0*locus.scale,
 					this.render_image.mW*locus.scale,
 					this.render_image.mH*locus.scale);
 			},
 			simulate: function(priorState, UT){
 				var angle = Math.random() * 2 * Math.PI;
-				this.position.x += Math.cos(angle)*4;
-				this.position.y += Math.sin(angle)*4;
+				//this.position.x += Math.cos(angle)*4;
+				//this.position.y += Math.sin(angle)*4;
 			}
 		});
-}
-function newTile(params){
-	return _.defaults(params,
-		randomEntity(
-			{
-				position: {x:params.x * tileSize, y:params.y * tileSize},
-				entity_class: 'Tile',
-				entity_subclass: 'Moor',
-				render_image: assets['bad_grass'],
-				render_z:1,
-				simulate: function(priorState, UT){}
-			})
-		);
 }
 
  function simulateGameState(state, priorState, dt){
@@ -92,16 +59,27 @@ function newTile(params){
  	})
  }
  function renderGameState(state,ctx,viewZoom,viewOffset,viewExtent){
- 	var wrz = function(entity){
+ 	function wrz(entity){
  		//Perform transform from 0.0->1.0 normalized worldscape to camera-pixel space
  		var xOff = (entity.position.x + viewOffset.x)*viewZoom + viewExtent.x/2;
  		var yOff = (entity.position.y + viewOffset.y)*viewZoom + viewExtent.y/2;
- 		var scale = viewZoom * assets.ppm;
+ 		var scale = viewZoom * assets_ppm;
+ 		//Don't render off-screen
+ 		if(onScreen(xOff,yOff,viewExtent))
  		entity.render(ctx,{x:xOff, y:yOff, scale:scale})
+
+ 	}
+ 	function onScreen(xOff, yOff, viewExtent){
+ 		var buff = 100
+ 		if(xOff < 0 - buff || xOff > viewExtent.x + buff)
+			return false;
+		if(yOff < 0 - buff || yOff > viewExtent.y + buff)
+			return false;
+		return true
  	}
  	//TODO: Look into insertion sort, given that this sort is on generally-sorted entities (assuming entities to don't move far frame-to-frame)
  	state.entities = _.sortBy(state.entities,function(entity){return entity.position.y})//using 'further away is behind' metric
- 	_.each(state.tiles, wrz);
+ 	_.each(state.terrain.tiles, wrz);
  	_.each(state.entities, wrz);
  }
 
@@ -122,7 +100,7 @@ var CameraView = function(canvas, game){
 	self.ctx = self.canvas.getContext("2d");
 	self.canvasExtent = {x:800, y:400}
 	self.viewPortZoom = 1.0;
-	self.viewPortOffset = {x:-400,y:-200};
+	self.viewPortOffset = {x:-worldExtent.x/2,y:-worldExtent.y/2};
 	//Implements zooming viewport on game
 	self.canvas.addEventListener('mousewheel', function(e){
 		e.preventDefault();
@@ -187,14 +165,22 @@ CameraView.prototype.render = function(){
 //   ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝ 
 //  
 
-var assets = {
-	ppm : 15, //15 pixels per meter at 1x zoom in the camera view port
-	'house' : loadAsset('img/house.png',65.5)(),
-	'denizen' :  loadAsset('img/denizen.png',30)(), //The denizen.png (which happens to be 30 pixels tall) has 30 pixels per meter
-	'bad_grass' : loadAsset('img/bad_grass_hex.png',24)()
-}
 var worldExtent = {x:800,y:400};
+var assets_ppm = 15; //15 pixels per meter at 1x zoom in the camera view port
 var tileSize = 60;
+var assets = {
+	'denizen' :  loadAsset('img/denizen.png',30)(), //The denizen.png (which happens to be 30 pixels tall) has 30 pixels per meter
+	'bad_grass' : loadAsset('img/bad_grass_hex.png',24.8)(),
+	'bad_dead_grass' : loadAsset('img/bad_dead_grass_hex.png',24.8)(),
+	'bad_lake_water' : loadAsset('img/bad_lake_water_hex.png',24.8)(),
+	'bad_wood_floor' : loadAsset('img/bad_wood_floor_hex.png',24.8)()
+}
+var Tile_Types = {
+	'grass' 	 : {image: 'bad_grass', class : 'Tile', subclass: 'grass'},
+	'dead_grass' : {image: 'bad_dead_grass', class : 'Tile', subclass: 'grass'},
+	'lake_water' : {image: 'bad_lake_water', class : 'Tile', subclass: 'water'},
+	'wood_floor' : {image: 'bad_wood_floor', class : 'Tile', subclass: 'floor'}
+}
 
 //  ██╗   ██╗████████╗██╗██╗     ███████╗
 //  ██║   ██║╚══██╔══╝██║██║     ██╔════╝

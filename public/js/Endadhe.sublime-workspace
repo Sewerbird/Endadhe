@@ -4,6 +4,46 @@
 		"selected_items":
 		[
 			[
+				"tile",
+				"tileFactoryFunction"
+			],
+			[
+				"bad",
+				"bad_grass_hex"
+			],
+			[
+				"xpUp",
+				"xpUpCallback"
+			],
+			[
+				"lvel",
+				"levelUpCallback"
+			],
+			[
+				"ch",
+				"checkLevelUp"
+			],
+			[
+				"level",
+				"levelUpCallback"
+			],
+			[
+				"Torr",
+				"TorrentBar"
+			],
+			[
+				"trials",
+				"trialsNeedToReachMax"
+			],
+			[
+				"max",
+				"maxToMax"
+			],
+			[
+				"trial",
+				"trialsNeedToReachMax"
+			],
+			[
 				"pixel",
 				"pixelToMeterRatio"
 			],
@@ -215,7 +255,7 @@
 			"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 			"settings":
 			{
-				"buffer_size": 919,
+				"buffer_size": 1051,
 				"line_ending": "Unix"
 			}
 		},
@@ -223,15 +263,31 @@
 			"file": "game.js",
 			"settings":
 			{
-				"buffer_size": 7778,
+				"buffer_size": 7930,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "//Finite State Machine\n\nvar FiniteState = function(){\n	\n}\n\nFiniteState.prototype.enter = function(){\n\n}\n\nFiniteState.prototype.exit = function(){\n\n}\n\nFiniteState.prototype.execute = function(){\n	\n}",
+			"file": "tileTerrainState.js",
 			"settings":
 			{
-				"buffer_size": 197,
+				"buffer_size": 1846,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "torrentBar.js",
+			"settings":
+			{
+				"buffer_size": 2113,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "eventer.js",
+			"settings":
+			{
+				"buffer_size": 485,
 				"line_ending": "Unix"
 			}
 		}
@@ -260,6 +316,9 @@
 	},
 	"file_history":
 	[
+		"/Applications/Ryzom.app/Contents/Resources/client_default.cfg",
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/lib/state-machine.js",
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/TileTerrainState.js",
 		"/Users/edwardmiller/Desktop/Endadhe/public/js/client.js",
 		"/Users/edwardmiller/Desktop/fuilbarrantas/public 2/js/monstercore.js",
 		"/Users/edwardmiller/Desktop/Endadhe/package.json",
@@ -384,10 +443,7 @@
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/socket.io/lib/parser.js",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/socket.io/lib/socket.io.js",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/gridfs-stream/lib/index.js",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/mongodb/lib/mongodb/collection.js",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/.git/info/exclude",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/mongodb/lib/mongodb/gridfs/gridstore.js",
-		"/Users/edwardmiller/Library/Application Support/Sublime Text 2/Packages/User/JavaScript.sublime-settings"
+		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/mongodb/lib/mongodb/collection.js"
 	],
 	"find":
 	{
@@ -406,6 +462,14 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"camera",
+			"house",
+			"assets_ppm",
+			"assets.ppm",
+			"worldExtent",
+			",",
+			"chain",
+			"(",
 			"800",
 			"screenCoordToHex",
 			"hexCoordToScreenCoord",
@@ -525,15 +589,7 @@
 			"findList",
 			".query",
 			"retriev",
-			"_retrieve",
-			"execGet",
-			"storePair",
-			"storepair",
-			"storePair",
-			"storePairTo",
-			"storePair",
-			"store",
-			"_storePair"
+			"_retrieve"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -541,6 +597,7 @@
 		"regex": true,
 		"replace_history":
 		[
+			"\\n",
 			"self",
 			"togglelog"
 		],
@@ -587,15 +644,15 @@
 					"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 					"settings":
 					{
-						"buffer_size": 919,
+						"buffer_size": 1051,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								580,
-								580
+								373,
+								373
 							]
 						],
 						"settings":
@@ -614,15 +671,15 @@
 					"file": "game.js",
 					"settings":
 					{
-						"buffer_size": 7778,
+						"buffer_size": 7930,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3513,
-								3513
+								1256,
+								1256
 							]
 						],
 						"settings":
@@ -631,28 +688,84 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 283.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 3,
+					"file": "tileTerrainState.js",
 					"settings":
 					{
-						"buffer_size": 197,
+						"buffer_size": 1846,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								195,
-								195
+								982,
+								982
 							]
 						],
 						"settings":
 						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "torrentBar.js",
+					"settings":
+					{
+						"buffer_size": 2113,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								251,
+								251
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "eventer.js",
+					"settings":
+					{
+						"buffer_size": 485,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								485,
+								485
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
