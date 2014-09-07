@@ -125,6 +125,9 @@ var CameraView = function(canvas, game){
 	}
 	self.canvas.addEventListener('mousedown', function(e){
 		self.clickDown = {x:e.x, y: e.y};
+		var project = self.game.terrain.getNearestTileToLocation(e.x + self.viewPortOffset.x - self.canvas.offsetLeft,e.y + self.viewPortOffset.y - self.canvas.offsetTop)
+		if(project)
+			console.log(project.x,project.y,project);
 		self.gameDragListener = onGamePan;
 		self.canvas.addEventListener('mousemove',self.gameDragListener, false);
 	}, false);

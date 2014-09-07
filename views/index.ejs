@@ -3,25 +3,16 @@
 		<title><%= title %></title>
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 	</head>
-	<body>
+	<body onload="start();">
 		<h3>Endadhe - Sneaky Necromancer Redux</h3>
-		<canvas id="canvas" width="800" height="400" tabindex="1"/>
-		<script type="text/javascript" src="/js/lib/rhill-voronoi-core.js"></script>
-		<script type="text/javascript" src="/js/lib/lodash.js"></script>
-		<script type="text/javascript" src="/js/lib/state-machine.js"></script>
-		<script type="text/javascript" src="/js/tileTerrainState.js"></script>
-		<script type="text/javascript" src="/js/game.js"></script>
-		<script type="text/javascript" src="/js/eventer.js"></script>
-		<script type="text/javascript" src="/js/torrentBar.js"></script>
+		<canvas id="canvas" tabindex="1"/>
+		<script type="text/javascript" src="/js/lib/pixi.js"></script>
+		<script type+"text/javascript" src="/js/main.js"></script>
 		<script type="text/javascript">
-			var game = generateInitialState();
-			var cameraView = new CameraView(canvas, game);
-			//Handle browser input
-			document.getElementById("canvas").focus();
-			var simTimer = setInterval(function(){
-				simulateGameState(game,game,0.1);
-				cameraView.render();
-			},100)
+			//Start Game
+			function start(){
+				main = new Main(800,600,"canvas");
+			}
 		</script>
 	</body>
 </html>

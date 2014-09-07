@@ -15,10 +15,27 @@ tileTerrainState.prototype.generate = function(tileFactoryFunction){
 		}
 	}
 }
+tileTerrainState.prototype.pointToTile = function(x,y){
 
+}
 tileTerrainState.prototype.queryTile = function(x,y){
 	var self = this;
 	return _.find(self.tiles,function(tile){return tile.coords.x == x && tile.coords.y == y})
+}
+tileTerrainState.prototype.getTileNeighbors = function(x,y){
+	var self = this;
+	return _.filter(self.tiles,function(tile){
+		return (
+			(tile.coords.x == x && Math.abs(tile.coords.y - y) == 1) ||
+			(Math.abs(tile.coords.x - x) == 1 && (tile.coords.y == y || y-tile.coords.y==(x%2==0?1:-1))))
+	})
+}
+tileTerrainState.prototype.getNearestTileToLocation = function(x,y){
+	var self = this;
+	var tileSize = 60;//TODO
+	var c_x = Math.floor(x / tileSize)
+	var c_y = Math.floor(y / tileSize)
+	return self.queryTile(c_x, Math.ceil(c_y - (c_x%2==0?0.5:0)));
 }
 
 var Tile = 	function(params){
@@ -51,7 +68,6 @@ function trulyRandomTileFactory(x,y){
 	var randomType = Tile_Types[_.sample(_.keys(Tile_Types))]
 	return new Tile({x:x, y:y, render_image: assets[randomType.image], entity_class: randomType.class, entity_subclass: randomType.subclass});
 }
-
 function placeOnNearestTile(object,x,y){
 	var tileSize = 60;//TODO
 	var c_x = Math.floor(x / tileSize)

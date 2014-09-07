@@ -263,7 +263,15 @@
 			"file": "game.js",
 			"settings":
 			{
-				"buffer_size": 7930,
+				"buffer_size": 8154,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/edwardmiller/Desktop/Backwi.re/backwire/test/client/blackboxTests.js",
+			"settings":
+			{
+				"buffer_size": 17460,
 				"line_ending": "Unix"
 			}
 		},
@@ -271,7 +279,7 @@
 			"file": "tileTerrainState.js",
 			"settings":
 			{
-				"buffer_size": 1846,
+				"buffer_size": 2454,
 				"line_ending": "Unix"
 			}
 		},
@@ -610,7 +618,7 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 3,
 			"sheets":
 			[
 				{
@@ -671,15 +679,15 @@
 					"file": "game.js",
 					"settings":
 					{
-						"buffer_size": 7930,
+						"buffer_size": 8154,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1256,
-								1256
+								3445,
+								3445
 							]
 						],
 						"settings":
@@ -688,25 +696,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1035.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 3,
-					"file": "tileTerrainState.js",
+					"file": "/Users/edwardmiller/Desktop/Backwi.re/backwire/test/client/blackboxTests.js",
 					"settings":
 					{
-						"buffer_size": 1846,
+						"buffer_size": 17460,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								982,
-								982
+								1756,
+								1775
 							]
 						],
 						"settings":
@@ -715,13 +723,40 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 327.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 4,
+					"file": "tileTerrainState.js",
+					"settings":
+					{
+						"buffer_size": 2454,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								927,
+								927
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 184.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"file": "torrentBar.js",
 					"settings":
 					{
@@ -748,7 +783,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "eventer.js",
 					"settings":
 					{
