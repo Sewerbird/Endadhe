@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"setInter",
+				"setInteractive"
+			],
+			[
 				"tile",
 				"tileFactoryFunction"
 			],
@@ -255,48 +259,20 @@
 			"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 			"settings":
 			{
-				"buffer_size": 1051,
+				"buffer_size": 394,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "game.js",
+			"contents": "var  main = new Main(800,600,\"canvas\");;\n\nfunction Main(sizeX,sizeY,element){				\n	this.stage = new PIXI.Stage(0x6677AA);\n	this.stage.interactive = true;\n	this.game = new GameState();\n	this.renderer = PIXI.autoDetectRenderer(sizeX?sizeX:800,sizeY?sizeY:600,document.getElementById(element?element:\"canvas\"));\n	this.camera = new CameraView();\n	this.camera.linkPan(this.stage);\n	setInterval(game.simulate.bind(game),10);\n	requestAnimFrame(this.draw.bind(this));\n}\nMain.prototype.draw = function(){\n	this.stage.children.sort(this.camera.depthCompare);\n	this.game.draw(this.camera);\n	this.renderer.render(this.stage);\n	requestAnimFrame(this.draw.bind(this));\n}\n\nfunction GameState(){\n	this.populace = new Populace(),\n	this.terrain = new Terrain();\n}\n\nGameState.prototype.draw = function(camera){\n\n	this.terrain.draw(camera);\n	this.populace.draw(camera);\n}\nGameState.prototype.simulate = function(priorState, timeDelta){\n	if(!timeDelta)timeDelta = 100;\n	var self = this;\n	self.populace.simulate(this,timeDelta);\n}\n\nfunction Populace(){\n	var self = this;\n	self.entities = new Array();\n	for(var i = 0; i < 100; i++){\n		var x = Math.floor(Math.random()*16);\n		var y = Math.floor(Math.random()*12);\n		self.entities.push(new Villager(x,y));\n	}\n}\nPopulace.prototype.draw = function(camera){\n	var self = this;\n	for(var i = 0; i < self.entities.length; i ++)\n	{\n		self.entities[i].draw(camera);\n	}\n}\nPopulace.prototype.simulate = function(priorState, delta){\n	var self = this;\n	for(var i = 0; i <self.entities.length; i++)\n	{\n		self.entities[i].simulate(priorState,delta);\n	}\n}\n\nfunction Terrain(){\n	var self = this;\n	self.tiles = new Array();\n	self.params = {\n		tileX : 16,\n		tileY : 12\n	}\n	for(var i = 0; i < self.params.tileY; i++)\n	{\n		for(var j = 0; j < self.params.tileX; j++)\n		{\n			self.tiles.push(new Tile(j,i));\n		}\n	}\n}\nTerrain.prototype.draw = function(camera){\n	var self = this;\n	for(var i = 0; i < self.tiles.length; i ++)\n	{\n		self.tiles[i].draw(camera);\n	}\n}\n\nfunction Tile(x,y){\n	var r = Math.floor(Math.random() * 4)\n	var tex;\n	switch(r)\n	{\n		case 0:\n			type = 'grass';\n			tex = 'img/bad_grass_hex.png'; break;\n		case 1:\n			type = 'dead_grass';\n			tex = 'img/bad_dead_grass_hex.png'; break;\n		case 2:\n			type = 'lake_water';\n			tex = 'img/bad_lake_water_hex.png'; break;\n		case 3:\n			type = 'wood_floor';\n			tex = 'img/bad_wood_floor_hex.png'; break;\n	}\n	this.texture = PIXI.Texture.fromImage(tex);\n	this.sprite = new PIXI.Sprite(this.texture);\n	this.sprite.anchor.x = 0.5;\n	this.sprite.anchor.y = 0.5;\n	this.tileSize = 100;\n	this.sprite.position.x = x * this.tileSize;\n	this.sprite.position.y = (y - (x%2==0?0.5:0)) * this.tileSize;\n	this.sprite.position.z = 0;\n	//World position in pixels\n	this.position = {\n		x : x * this.tileSize,\n		y : (y - (x%2==0?0.5:0)) * this.tileSize\n	};\n	//World position in tiles\n	this.coord = {\n		x : x,\n		y : y\n	};\n	this.sprite.setInteractive(true);\n	this.sprite.mouseup = this.onClick;\n	main.stage.addChild(this.sprite);\n}\nTile.prototype.draw = function(camera){\n	this.sprite.position.x = (camera.pan.x + this.position.x) * camera.zoom + camera.viewSize.x/2;\n	this.sprite.position.y = (camera.pan.y + this.position.y) * camera.zoom + camera.viewSize.y/2;\n	this.sprite.scale.x = camera.zoom;\n	this.sprite.scale.y = camera.zoom;\n}\nTile.prototype.onClick = function(mouseData){\n	var self = this;\n}\n\nfunction Villager(x,y){\n	this.texture = PIXI.Texture.fromImage(\"/img/denizen.png\");\n	this.sprite = new PIXI.Sprite(this.texture);\n	this.sprite.anchor.x = 0.5;\n	this.sprite.anchor.y = 0.5;\n	this.tileSize = 100;\n	this.sprite.position.x = x * this.tileSize;\n	this.sprite.position.y = (y - (x%2==0?0.5:0)) * this.tileSize;\n	this.sprite.position.z = 1;\n	//World position in pixels\n	this.position = {\n		x : x * this.tileSize,\n		y : (y - (x%2==0?0.5:0)) * this.tileSize\n	};\n	//World position in tiles\n	this.coord = {\n		x : x,\n		y : y\n	};\n	this.sprite.setInteractive(true);\n	this.sprite.mouseup = this.onClick.bind(this)\n	main.stage.addChild(this.sprite);\n}\nVillager.prototype.draw = function(camera){\n	this.sprite.position.x = (camera.pan.x + this.position.x) * camera.zoom + camera.viewSize.x/2;\n	this.sprite.position.y = (camera.pan.y + this.position.y) * camera.zoom + camera.viewSize.y/2;\n	this.sprite.scale.x = camera.zoom;\n	this.sprite.scale.y = camera.zoom;\n}\nVillager.prototype.onClick = function(mouseData){\n	var self = this;\n	main.camera.selected = self;\n	console.log(\"I WAS CLICKED\",self);\n}\nVillager.prototype.actionOn = function(x,y){\n	var self = this;\n	self.goal = {verb:'move',x:x, y:y, speed: 100}\n}\nVillager.prototype.simulate = function(priorState, delta){\n	var self = this;\n	if(!self.goal)\n	{\n		return;\n	}\n	var c_x = self.position.x;\n	var c_y = self.position.y;\n	var d_x = self.goal.x;\n	var d_y = self.goal.y;\n	var distance = Math.sqrt(Math.pow(d_x - c_x,2) + Math.pow(d_y - c_y,2));\n	var n_x = (d_x-c_x)/distance;\n	var n_y = (d_y-c_y)/distance;\n	var dX = n_x * delta/1000 * self.goal.speed\n	var dY = n_y * delta/1000 * self.goal.speed\n	self.position.x += dX\n	self.position.y += dY\n	if(Math.abs(dX) > distance || Math.abs(dY > distance)) self.goal = undefined;\n}\n\nvar CameraView = function(){\n	this.selected = undefined;\n	this.viewSize = {\n		x : 800,\n		y : 600\n	}\n	this.pan = {\n		x : 0,\n		y : 0,\n		minPanX : undefined,\n		minPanY : undefined,\n		maxPanX : undefined,\n		maxPanY : undefined\n	}\n	this.isPanning = false;\n	this.zoom = 1.0\n	this.maxZoom = 3.0\n	this.minZoom = 0.1\n	this.onDown = {\n		x:undefined,\n		y:undefined\n	}\n	var self = this;\n	//Implements zooming viewport on game for now\n	document.getElementById(\"canvas\").addEventListener('mousewheel', function(e){\n		e.preventDefault();\n		//Figure zoomfactor\n		var diff = 0.1\n		var dir= (e.wheelDeltaY?(e.wheelDeltaY<0?-diff:diff):undefined)\n		self.doZoom(1 + dir);\n	}, false);\n\n}\nCameraView.prototype.doPan = function(dX,dY){\n	this.pan.x += dX / this.zoom;\n	this.pan.y += dY / this.zoom;\n}\nCameraView.prototype.doZoom = function(dZ){\n	this.zoom *= dZ;\n}\nCameraView.prototype.screenToWorld = function(x,y){\n	var self = this;\n	var t_x = (x - self.viewSize.x/2) / self.zoom - self.pan.x\n	var t_y = (y - self.viewSize.y/2) / self.zoom - self.pan.y\n	return {x:t_x, y:t_y}\n}\nCameraView.prototype.worldtoScreen = function(x,y){\n	var self = this;\n	t_x = (self.pan.x + x) * self.zoom + self.viewSize.x/2;\n	t_y = (self.pan.y + y) * self.zoom + self.viewSize.y/2;\n	return {x:t_x, y:t_y}\n}\nCameraView.prototype.linkPan = function(stage){\n	var self = this;\n	stage.mousedown = function(mouseData){\n		if(!self.selected){\n			self.onDown.x = mouseData.global.x\n			self.onDown.y = mouseData.global.y\n			self.isPanning = true;\n		}\n		else{\n			var worldCoord = self.screenToWorld(mouseData.global.x, mouseData.global.y);\n			self.selected.actionOn(worldCoord.x, worldCoord.y);\n			self.selected = undefined;\n		}\n	}\n	stage.mousemove = function(mouseData){\n		if(self.isPanning)\n		{\n			self.doPan(mouseData.global.x - self.onDown.x, mouseData.global.y - self.onDown.y)\n			self.onDown.x = mouseData.global.x\n			self.onDown.y = mouseData.global.y\n		}\n	}\n	stage.mouseup = function(mouseData){\n		self.isPanning = false;\n		self.onDown.x = undefined;\n		self.onDown.y = undefined;\n	}\n	stage.mouseout = function(mouseData){\n		stage.mouseup(mouseData);\n	}\n}\nCameraView.prototype.depthCompare = function(a,b) {\n	var self = this;\n	if(a.position.z != b.position.z)\n	{\n		return CameraView.prototype.sign(a.position.z - b.position.z)\n	}\n	else\n	{\n		return CameraView.prototype.sign(a.position.y - b.position.y)\n	}\n}\nCameraView.prototype.sign = function(x){\n    if( +x === x ) { // check if a number was given\n        return (x === 0) ? x : (x > 0) ? 1 : -1;\n    }\n    return NaN;\n}",
+			"file": "main.js",
+			"file_size": 7654,
+			"file_write_time": 1410150118000000,
 			"settings":
 			{
-				"buffer_size": 8154,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/edwardmiller/Desktop/Backwi.re/backwire/test/client/blackboxTests.js",
-			"settings":
-			{
-				"buffer_size": 17460,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "tileTerrainState.js",
-			"settings":
-			{
-				"buffer_size": 2454,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "torrentBar.js",
-			"settings":
-			{
-				"buffer_size": 2113,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "eventer.js",
-			"settings":
-			{
-				"buffer_size": 485,
-				"line_ending": "Unix"
+				"buffer_size": 7636,
+				"line_ending": "Unix",
+				"name": "function Main(){"
 			}
 		}
 	],
@@ -324,6 +300,15 @@
 	},
 	"file_history":
 	[
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/eventer.js",
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/torrentBar.js",
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/tileTerrainState.js",
+		"/Users/edwardmiller/Desktop/Endadhe/public/js/game.js",
+		"/Users/edwardmiller/Library/Application Support/Sublime Text 2/Packages/JavaScript/JavaScript.tmLanguage",
+		"/Users/edwardmiller/Library/Application Support/Sublime Text 2/Packages/JavaScript/Symbol List Instance.tmPreferences",
+		"/Users/edwardmiller/Library/Application Support/Sublime Text 2/Packages/User/JavaScript.sublime-settings",
+		"/Users/edwardmiller/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/edwardmiller/Desktop/Backwi.re/backwire/test/client/blackboxTests.js",
 		"/Applications/Ryzom.app/Contents/Resources/client_default.cfg",
 		"/Users/edwardmiller/Desktop/Endadhe/public/js/lib/state-machine.js",
 		"/Users/edwardmiller/Desktop/Endadhe/public/js/TileTerrainState.js",
@@ -442,16 +427,7 @@
 		"/Users/edwardmiller/Desktop/Backwi.re/BackwireLoad Heirarchy",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/public/deserializeTest/index.html",
 		"/Users/edwardmiller/Desktop/Backwi.re/backwire/applications/edsample/index.html",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/public/deserializeTest/jquery.deserialize.js",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/public/deserializeTest/ReadMe.md",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/js/jquery.deserialize.js",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/js/deserializeTest.html",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/public/MonsterWire/js/foo.java",
-		"/Users/edwardmiller/Desktop/BarCamp Presentation",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/socket.io/lib/parser.js",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/socket.io/lib/socket.io.js",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/gridfs-stream/lib/index.js",
-		"/Users/edwardmiller/Desktop/Backwi.re/backwire/node_modules/mongodb/lib/mongodb/collection.js"
+		"/Users/edwardmiller/Desktop/Backwi.re/backwire/public/deserializeTest/jquery.deserialize.js"
 	],
 	"find":
 	{
@@ -470,6 +446,14 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"game",
+			"stage",
+			"main.",
+			"main.cameramain.",
+			"main.camera",
+			"16",
+			"this",
+			"animate",
 			"camera",
 			"house",
 			"assets_ppm",
@@ -589,15 +573,7 @@
 			"console.log(\\\"[0-9]\\\");",
 			"console.log(\"[0-9]\");",
 			"console.log(\"[0-9]",
-			"_validate",
-			"that.findList",
-			"delete that.findList",
-			"delete findList",
-			"findList[",
-			"findList",
-			".query",
-			"retriev",
-			"_retrieve"
+			"_validate"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -618,7 +594,7 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -652,15 +628,15 @@
 					"file": "/Users/edwardmiller/Desktop/Endadhe/views/index.ejs",
 					"settings":
 					{
-						"buffer_size": 1051,
+						"buffer_size": 394,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								373,
-								373
+								376,
+								376
 							]
 						],
 						"settings":
@@ -676,135 +652,27 @@
 				},
 				{
 					"buffer": 2,
-					"file": "game.js",
+					"file": "main.js",
 					"settings":
 					{
-						"buffer_size": 8154,
+						"buffer_size": 7636,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3445,
-								3445
+								3934,
+								3934
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1035.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "/Users/edwardmiller/Desktop/Backwi.re/backwire/test/client/blackboxTests.js",
-					"settings":
-					{
-						"buffer_size": 17460,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1756,
-								1775
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 327.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "tileTerrainState.js",
-					"settings":
-					{
-						"buffer_size": 2454,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								927,
-								927
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 184.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "torrentBar.js",
-					"settings":
-					{
-						"buffer_size": 2113,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								251,
-								251
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "eventer.js",
-					"settings":
-					{
-						"buffer_size": 485,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								485,
-								485
-							]
-						],
-						"settings":
-						{
-							"auto_name": "",
+							"auto_name": "function Main(){",
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 3693.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
